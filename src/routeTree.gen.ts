@@ -14,8 +14,10 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminFormatsRouteImport } from './routes/admin.formats'
+import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
 import { Route as ApiPublicHooksCleanupImagesRouteImport } from './routes/api/public/hooks/cleanup-images'
 
@@ -44,6 +46,11 @@ const OrderIdRoute = OrderIdRouteImport.update({
   path: '/order/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
@@ -52,6 +59,11 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
 const AdminFormatsRoute = AdminFormatsRouteImport.update({
   id: '/formats',
   path: '/formats',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminExpensesRoute = AdminExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminOrdersIdRoute = AdminOrdersIdRouteImport.update({
@@ -70,8 +82,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/admin/expenses': typeof AdminExpensesRoute
   '/admin/formats': typeof AdminFormatsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
   '/order/$id': typeof OrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
@@ -80,8 +94,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin/expenses': typeof AdminExpensesRoute
   '/admin/formats': typeof AdminFormatsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
   '/order/$id': typeof OrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
@@ -92,8 +108,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
+  '/admin/expenses': typeof AdminExpensesRoute
   '/admin/formats': typeof AdminFormatsRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
   '/order/$id': typeof OrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
@@ -105,8 +123,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/expenses'
     | '/admin/formats'
     | '/admin/orders'
+    | '/admin/settings'
     | '/order/$id'
     | '/admin/'
     | '/admin/orders/$id'
@@ -115,8 +135,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/admin/expenses'
     | '/admin/formats'
     | '/admin/orders'
+    | '/admin/settings'
     | '/order/$id'
     | '/admin'
     | '/admin/orders/$id'
@@ -126,8 +148,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/expenses'
     | '/admin/formats'
     | '/admin/orders'
+    | '/admin/settings'
     | '/order/$id'
     | '/admin/'
     | '/admin/orders/$id'
@@ -179,6 +203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/orders': {
       id: '/admin/orders'
       path: '/orders'
@@ -191,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/formats'
       fullPath: '/admin/formats'
       preLoaderRoute: typeof AdminFormatsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/expenses': {
+      id: '/admin/expenses'
+      path: '/expenses'
+      fullPath: '/admin/expenses'
+      preLoaderRoute: typeof AdminExpensesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/orders/$id': {
@@ -223,14 +261,18 @@ const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminExpensesRoute: typeof AdminExpensesRoute
   AdminFormatsRoute: typeof AdminFormatsRoute
   AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminExpensesRoute: AdminExpensesRoute,
   AdminFormatsRoute: AdminFormatsRoute,
   AdminOrdersRoute: AdminOrdersRouteWithChildren,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

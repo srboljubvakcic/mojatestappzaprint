@@ -35,9 +35,11 @@ function OrderConfirmation() {
 
           <div className="mt-8 rounded-2xl bg-secondary p-5 text-left">
             <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-              <Package className="h-3.5 w-3.5" /> Broj narudžbe
+              <Package className="h-3.5 w-3.5" /> Referenca narudžbe
             </div>
-            <div className="mt-1 break-all font-mono text-sm">{id}</div>
+            <div className="mt-1 break-all font-mono text-[11px] text-muted-foreground">
+              {id}
+            </div>
             {typeof total === "number" && (
               <div className="mt-4 flex items-baseline justify-between border-t border-border pt-3">
                 <span className="text-sm text-muted-foreground">Ukupno</span>

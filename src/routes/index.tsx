@@ -14,19 +14,20 @@ import {
   Truck,
   Sparkles,
   Loader2,
+  Zap,
+  BookOpen,
+  Gift,
 } from "lucide-react";
 
-import { listActiveFormats } from "@/lib/api/formats.functions";
-import {
-  createSignedUploads,
-  submitOrder,
-} from "@/lib/api/orders.functions";
+import { listActiveFormats, getPublicSettings } from "@/lib/api/formats.functions";
+import { createSignedUploads, submitOrder } from "@/lib/api/orders.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKM } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -51,7 +52,7 @@ export const Route = createFileRoute("/")({
 });
 
 type UploadedImage = {
-  id: string; // local
+  id: string;
   previewUrl: string;
   storagePath: string | null;
   fileName: string;
@@ -60,10 +61,14 @@ type UploadedImage = {
   quantity: number;
 };
 
+type ExtraItem = { id: string; formatId: string; quantity: number };
+
 function HomePage() {
   const navigate = useNavigate();
   const orderRef = useRef(crypto.randomUUID());
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const [extras, setExtras] = useState<ExtraItem[]>([]);
+  const [sameDay, setSameDay] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [customer, setCustomer] = useState({
@@ -80,8 +85,16 @@ function HomePage() {
     queryKey: ["formats"],
     queryFn: () => listActiveFormats(),
   });
+  const settingsQuery = useQuery({
+    queryKey: ["public-settings"],
+    queryFn: () => getPublicSettings(),
+  });
+  const settings = settingsQuery.data?.settings;
   const formats = formatsQuery.data?.formats ?? [];
-  const defaultFormatId = formats[0]?.id ?? "";
+  const prints = formats.filter((f: any) => (f.category ?? "print") === "print");
+  const albums = formats.filter((f: any) => f.category === "album");
+  const gifts = formats.filter((f: any) => f.category === "gift");
+  const defaultFormatId = prints[0]?.id ?? "";
 
   const createSignedUploadsFn = useServerFn(createSignedUploads);
   const submitOrderFn = useServerFn(submitOrder);
@@ -90,10 +103,9 @@ function HomePage() {
     async (accepted: File[]) => {
       if (!accepted.length) return;
       if (!defaultFormatId) {
-        toast.error("Formati još nisu učitani. Pokušajte ponovo za par sekundi.");
+        toast.error("Formati još nisu učitani.");
         return;
       }
-      // create local entries first
       const locals: UploadedImage[] = accepted.map((f) => ({
         id: crypto.randomUUID(),
         previewUrl: URL.createObjectURL(f),
@@ -126,17 +138,11 @@ function HomePage() {
             setImages((prev) =>
               prev.map((img) =>
                 img.id === local.id
-                  ? {
-                      ...img,
-                      uploading: false,
-                      storagePath: error ? null : u.path,
-                    }
+                  ? { ...img, uploading: false, storagePath: error ? null : u.path }
                   : img,
               ),
             );
-            if (error) {
-              toast.error(`Greška kod otpremanja: ${file.name}`);
-            }
+            if (error) toast.error(`Greška kod otpremanja: ${file.name}`);
           }),
         );
       } catch (e: any) {
@@ -155,27 +161,47 @@ function HomePage() {
     noKeyboard: true,
   });
 
-  const updateImg = (id: string, patch: Partial<UploadedImage>) => {
+  const updateImg = (id: string, patch: Partial<UploadedImage>) =>
     setImages((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
-  };
-  const removeImg = (id: string) => {
-    setImages((prev) => prev.filter((i) => i.id !== id));
-  };
+  const removeImg = (id: string) => setImages((prev) => prev.filter((i) => i.id !== id));
 
-  const total = useMemo(() => {
-    let sum = 0;
+  const addExtra = (formatId: string) =>
+    setExtras((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), formatId, quantity: 1 },
+    ]);
+  const updateExtra = (id: string, patch: Partial<ExtraItem>) =>
+    setExtras((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+  const removeExtra = (id: string) =>
+    setExtras((prev) => prev.filter((e) => e.id !== id));
+
+  const totals = useMemo(() => {
+    let subtotal = 0;
     let qty = 0;
     for (const img of images) {
-      const f = formats.find((f) => f.id === img.formatId);
+      const f = formats.find((f: any) => f.id === img.formatId);
       if (!f) continue;
-      sum += Number(f.price_km) * img.quantity;
+      subtotal += Number(f.price_km) * img.quantity;
       qty += img.quantity;
     }
-    return { sum, qty };
-  }, [images, formats]);
+    for (const ex of extras) {
+      const f = formats.find((f: any) => f.id === ex.formatId);
+      if (!f) continue;
+      subtotal += Number(f.price_km) * ex.quantity;
+    }
+    const freeShip =
+      !!settings?.free_shipping_enabled &&
+      subtotal >= Number(settings?.free_shipping_threshold ?? 0);
+    const shipping = subtotal > 0 ? (freeShip ? 0 : Number(settings?.shipping_fee ?? 0)) : 0;
+    const sameDayFee =
+      sameDay && settings?.same_day_enabled ? Number(settings.same_day_price) : 0;
+    const total = subtotal + shipping + sameDayFee;
+    return { subtotal, shipping, sameDayFee, total, qty, freeShip };
+  }, [images, extras, formats, settings, sameDay]);
 
+  const hasItems = images.length + extras.length > 0;
   const canSubmit =
-    images.length > 0 &&
+    hasItems &&
     images.every((i) => !i.uploading && i.storagePath) &&
     customer.full_name.trim().length >= 2 &&
     customer.phone.trim().length >= 5 &&
@@ -187,22 +213,33 @@ function HomePage() {
     if (!canSubmit) return;
     setSubmitting(true);
     try {
+      const items = [
+        ...images.map((i) => ({
+          storage_path: i.storagePath!,
+          format_id: i.formatId,
+          quantity: i.quantity,
+        })),
+        ...extras.map((e) => ({
+          storage_path: null,
+          format_id: e.formatId,
+          quantity: e.quantity,
+        })),
+      ];
       const { orderId } = await submitOrderFn({
         data: {
           orderRef: orderRef.current,
+          same_day: sameDay,
           customer,
-          items: images.map((i) => ({
-            storage_path: i.storagePath!,
-            format_id: i.formatId,
-            quantity: i.quantity,
-          })),
+          items,
         },
       });
-      toast.success("Narudžba je uspješno poslana!");
+      toast.success("Narudžba uspješno poslana!", {
+        description: "Kontaktiraćemo vas uskoro za potvrdu.",
+      });
       navigate({
         to: "/order/$id",
         params: { id: orderId },
-        search: { total: total.sum },
+        search: { total: totals.total },
       });
     } catch (e: any) {
       toast.error(e?.message ?? "Greška kod slanja narudžbe");
@@ -210,6 +247,11 @@ function HomePage() {
       setSubmitting(false);
     }
   };
+
+  const remainingForFreeShip =
+    settings?.free_shipping_enabled && !totals.freeShip
+      ? Math.max(0, Number(settings.free_shipping_threshold) - totals.subtotal)
+      : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -232,20 +274,28 @@ function HomePage() {
           </p>
         </div>
 
-        <div className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm">
+        <div className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5">
             <ShieldCheck className="h-3.5 w-3.5" /> Sigurno otpremanje
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5">
-            <Truck className="h-3.5 w-3.5" /> Dostava u cijeloj BiH
-          </span>
+          {settings?.free_shipping_enabled && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-success">
+              <Truck className="h-3.5 w-3.5" /> Besplatna dostava preko{" "}
+              {formatKM(Number(settings.free_shipping_threshold))}
+            </span>
+          )}
+          {settings?.same_day_enabled && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1.5 text-warning-foreground">
+              <Zap className="h-3.5 w-3.5" /> Same day print dostupan
+            </span>
+          )}
           <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5">
             Plaćanje pouzećem
           </span>
         </div>
       </section>
 
-      {/* Upload area */}
+      {/* Upload */}
       <section className="mx-auto max-w-6xl px-4 sm:px-6">
         <div
           {...getRootProps()}
@@ -265,12 +315,7 @@ function HomePage() {
           <p className="mt-1.5 text-sm text-muted-foreground">
             ili kliknite dugme ispod · JPG, PNG, HEIC do 25MB
           </p>
-          <Button
-            type="button"
-            onClick={open}
-            size="lg"
-            className="mt-6 rounded-full px-6"
-          >
+          <Button type="button" onClick={open} size="lg" className="mt-6 rounded-full px-6">
             <ImagePlus className="mr-2 h-4 w-4" />
             Izaberi fotografije
           </Button>
@@ -326,41 +371,17 @@ function HomePage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {formats.map((f) => (
+                      {prints.map((f: any) => (
                         <SelectItem key={f.id} value={f.id}>
                           {f.name} — {formatKM(Number(f.price_km))}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Kopije</span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateImg(img.id, {
-                            quantity: Math.max(1, img.quantity - 1),
-                          })
-                        }
-                        className="grid h-8 w-8 place-items-center rounded-full border border-border hover:bg-accent"
-                      >
-                        <Minus className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="w-8 text-center text-sm font-medium tabular-nums">
-                        {img.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateImg(img.id, { quantity: Math.min(500, img.quantity + 1) })
-                        }
-                        className="grid h-8 w-8 place-items-center rounded-full border border-border hover:bg-accent"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
+                  <QtyInput
+                    value={img.quantity}
+                    onChange={(q) => updateImg(img.id, { quantity: q })}
+                  />
                 </div>
               </div>
             ))}
@@ -368,9 +389,69 @@ function HomePage() {
         </section>
       )}
 
+      {/* Extras: Albums & Gifts */}
+      {(albums.length > 0 || gifts.length > 0) && (
+        <section className="mx-auto mt-12 max-w-6xl px-4 sm:px-6">
+          <h3 className="text-lg font-semibold">Dodatni proizvodi</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Dodajte foto album ili poklon paket uz vašu narudžbu.
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            {albums.length > 0 && (
+              <ExtraGroup
+                icon={<BookOpen className="h-4 w-4" />}
+                title="Foto albumi"
+                products={albums}
+                onAdd={addExtra}
+              />
+            )}
+            {gifts.length > 0 && (
+              <ExtraGroup
+                icon={<Gift className="h-4 w-4" />}
+                title="Pokloni"
+                products={gifts}
+                onAdd={addExtra}
+              />
+            )}
+          </div>
+          {extras.length > 0 && (
+            <div className="mt-5 space-y-2">
+              {extras.map((ex) => {
+                const f = formats.find((f: any) => f.id === ex.formatId);
+                if (!f) return null;
+                return (
+                  <div
+                    key={ex.id}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium">{f.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatKM(Number(f.price_km))} po komadu
+                      </div>
+                    </div>
+                    <QtyInput
+                      value={ex.quantity}
+                      onChange={(q) => updateExtra(ex.id, { quantity: q })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeExtra(ex.id)}
+                      className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Cart + Delivery */}
-      {images.length > 0 && (
-        <section className="mx-auto mt-12 grid max-w-6xl gap-6 px-4 sm:px-6 lg:grid-cols-[1fr_380px]">
+      {hasItems && (
+        <section className="mx-auto mt-12 grid max-w-6xl gap-6 px-4 pb-16 sm:px-6 lg:grid-cols-[1fr_380px]">
           <div className="rounded-3xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8">
             <h3 className="text-lg font-semibold">Podaci za dostavu</h3>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -394,9 +475,7 @@ function HomePage() {
                 <Input
                   id="phone"
                   value={customer.phone}
-                  onChange={(e) =>
-                    setCustomer({ ...customer, phone: e.target.value })
-                  }
+                  onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
                   className="mt-1.5"
                   placeholder="+387 60 000 000"
                 />
@@ -407,9 +486,7 @@ function HomePage() {
                   id="email"
                   type="email"
                   value={customer.email}
-                  onChange={(e) =>
-                    setCustomer({ ...customer, email: e.target.value })
-                  }
+                  onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
                   className="mt-1.5"
                   placeholder="ime@example.com"
                 />
@@ -419,9 +496,7 @@ function HomePage() {
                 <Input
                   id="address"
                   value={customer.address}
-                  onChange={(e) =>
-                    setCustomer({ ...customer, address: e.target.value })
-                  }
+                  onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
                   className="mt-1.5"
                   placeholder="Ulica i broj"
                 />
@@ -431,9 +506,7 @@ function HomePage() {
                 <Input
                   id="city"
                   value={customer.city}
-                  onChange={(e) =>
-                    setCustomer({ ...customer, city: e.target.value })
-                  }
+                  onChange={(e) => setCustomer({ ...customer, city: e.target.value })}
                   className="mt-1.5"
                   placeholder="Sarajevo"
                 />
@@ -455,9 +528,7 @@ function HomePage() {
                 <Textarea
                   id="notes"
                   value={customer.notes}
-                  onChange={(e) =>
-                    setCustomer({ ...customer, notes: e.target.value })
-                  }
+                  onChange={(e) => setCustomer({ ...customer, notes: e.target.value })}
                   className="mt-1.5"
                   rows={3}
                   placeholder="Posebne želje, vrijeme isporuke, itd."
@@ -466,43 +537,83 @@ function HomePage() {
             </div>
           </div>
 
-          <aside className="h-fit rounded-3xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] lg:sticky lg:top-24">
-            <h3 className="text-lg font-semibold">Pregled narudžbe</h3>
-            <dl className="mt-4 space-y-2 text-sm">
-              <div className="flex justify-between text-muted-foreground">
-                <dt>Fotografije</dt>
-                <dd>{images.length}</dd>
+          <aside className="h-fit space-y-4 lg:sticky lg:top-24">
+            {settings?.same_day_enabled && (
+              <div className="flex items-center justify-between rounded-2xl border border-warning/30 bg-warning/5 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-warning/15 text-warning-foreground">
+                    <Zap className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <Label className="cursor-pointer text-sm font-semibold">
+                      Same day print
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Hitna štampa istog dana · +
+                      {formatKM(Number(settings.same_day_price))}
+                    </p>
+                  </div>
+                </div>
+                <Switch checked={sameDay} onCheckedChange={setSameDay} />
               </div>
-              <div className="flex justify-between text-muted-foreground">
-                <dt>Ukupno kopija</dt>
-                <dd>{total.qty}</dd>
-              </div>
-              <div className="my-3 border-t border-border" />
-              <div className="flex items-baseline justify-between">
-                <dt className="text-base font-medium">Ukupno</dt>
-                <dd className="text-2xl font-semibold tabular-nums">
-                  {formatKM(total.sum)}
-                </dd>
-              </div>
-            </dl>
-            <Button
-              size="lg"
-              className="mt-6 w-full rounded-full"
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Šaljem...
-                </>
-              ) : (
-                "Naruči"
+            )}
+
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
+              <h3 className="text-lg font-semibold">Pregled narudžbe</h3>
+              {remainingForFreeShip > 0 && (
+                <div className="mt-3 rounded-xl bg-primary/5 px-3 py-2 text-xs text-primary">
+                  Dodajte još {formatKM(remainingForFreeShip)} za{" "}
+                  <strong>besplatnu dostavu</strong>
+                </div>
               )}
-            </Button>
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              Plaćanje pouzećem prilikom dostave
-            </p>
+              <dl className="mt-4 space-y-2 text-sm">
+                <Row label={`Fotografije (${images.length})`} value={`${totals.qty} kopija`} muted />
+                {extras.length > 0 && (
+                  <Row label="Dodatni proizvodi" value={`${extras.length} stavki`} muted />
+                )}
+                <div className="my-3 border-t border-border" />
+                <Row label="Međuzbir" value={formatKM(totals.subtotal)} muted />
+                <Row
+                  label="Dostava"
+                  value={
+                    totals.shipping === 0 ? (
+                      <span className="text-success">Besplatno</span>
+                    ) : (
+                      formatKM(totals.shipping)
+                    )
+                  }
+                  muted
+                />
+                {totals.sameDayFee > 0 && (
+                  <Row label="Same day print" value={formatKM(totals.sameDayFee)} muted />
+                )}
+                <div className="my-3 border-t border-border" />
+                <div className="flex items-baseline justify-between">
+                  <dt className="text-base font-medium">Ukupno</dt>
+                  <dd className="text-2xl font-semibold tabular-nums">
+                    {formatKM(totals.total)}
+                  </dd>
+                </div>
+              </dl>
+              <Button
+                size="lg"
+                className="mt-6 w-full rounded-full"
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Šaljem...
+                  </>
+                ) : (
+                  "Naruči"
+                )}
+              </Button>
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                Plaćanje pouzećem prilikom dostave
+              </p>
+            </div>
           </aside>
         </section>
       )}
@@ -511,3 +622,115 @@ function HomePage() {
     </div>
   );
 }
+
+function QtyInput({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1">
+      <span className="mr-2 text-sm text-muted-foreground">Kopije</span>
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(1, value - 1))}
+        className="grid h-8 w-8 place-items-center rounded-full border border-border hover:bg-accent"
+      >
+        <Minus className="h-3.5 w-3.5" />
+      </button>
+      <input
+        type="number"
+        min={1}
+        max={500}
+        value={value}
+        onChange={(e) => {
+          const n = parseInt(e.target.value, 10);
+          if (Number.isNaN(n)) return;
+          onChange(Math.max(1, Math.min(500, n)));
+        }}
+        className="h-8 w-14 rounded-full border border-border bg-background text-center text-sm font-medium tabular-nums outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      />
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(500, value + 1))}
+        className="grid h-8 w-8 place-items-center rounded-full border border-border hover:bg-accent"
+      >
+        <Plus className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  muted,
+}: {
+  label: string;
+  value: React.ReactNode;
+  muted?: boolean;
+}) {
+  return (
+    <div
+      className={`flex justify-between ${muted ? "text-muted-foreground" : ""}`}
+    >
+      <dt>{label}</dt>
+      <dd className="tabular-nums">{value}</dd>
+    </div>
+  );
+}
+
+function ExtraGroup({
+  icon,
+  title,
+  products,
+  onAdd,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  products: any[];
+  onAdd: (id: string) => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-soft)]">
+      <div className="mb-3 flex items-center gap-2">
+        <span className="grid h-7 w-7 place-items-center rounded-lg bg-primary/10 text-primary">
+          {icon}
+        </span>
+        <h4 className="text-sm font-semibold">{title}</h4>
+      </div>
+      <ul className="space-y-2">
+        {products.map((p) => (
+          <li
+            key={p.id}
+            className="flex items-center justify-between gap-2 rounded-xl bg-secondary/50 px-3 py-2"
+          >
+            <div className="min-w-0">
+              <div className="text-sm font-medium">{p.name}</div>
+              {p.description && (
+                <div className="truncate text-[11px] text-muted-foreground">
+                  {p.description}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold tabular-nums">
+                {formatKM(Number(p.price_km))}
+              </span>
+              <button
+                type="button"
+                onClick={() => onAdd(p.id)}
+                className="grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-foreground hover:opacity-90"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+

@@ -25,7 +25,7 @@ export const createSignedUploads = createServerFn({ method: "POST" })
         .array(
           z.object({
             name: z.string().min(1).max(200),
-            size: z.number().int().min(1).max(25 * 1024 * 1024), // 25MB cap
+            size: z.number().int().min(1).max(25 * 1024 * 1024),
           }),
         )
         .min(1)
@@ -35,11 +35,7 @@ export const createSignedUploads = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const safeRef = data.orderRef;
-    const results: Array<{
-      path: string;
-      token: string;
-      originalName: string;
-    }> = [];
+    const results: Array<{ path: string; token: string; originalName: string }> = [];
     for (const f of data.files) {
       const ext = (f.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
       const path = `${safeRef}/${crypto.randomUUID()}.${ext || "jpg"}`;
@@ -57,6 +53,7 @@ export const submitOrder = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       orderRef: z.string().uuid(),
+      same_day: z.boolean().default(false),
       customer: z.object({
         full_name: z.string().trim().min(2).max(120),
         phone: z.string().trim().min(5).max(40),
@@ -69,7 +66,7 @@ export const submitOrder = createServerFn({ method: "POST" })
       items: z
         .array(
           z.object({
-            storage_path: z.string().min(3).max(400),
+            storage_path: z.string().min(3).max(400).optional().nullable(),
             format_id: z.string().uuid(),
             quantity: z.number().int().min(1).max(500),
           }),
@@ -81,7 +78,14 @@ export const submitOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Validate formats / pricing server-side
+    // Load settings
+    const { data: settings } = await supabaseAdmin
+      .from("app_settings")
+      .select("*")
+      .eq("id", 1)
+      .single();
+
+    // Load formats
     const formatIds = Array.from(new Set(data.items.map((i) => i.format_id)));
     const { data: formats, error: fErr } = await supabaseAdmin
       .from("formats")
@@ -91,44 +95,56 @@ export const submitOrder = createServerFn({ method: "POST" })
     const formatMap = new Map(formats!.map((f) => [f.id, f]));
     for (const fid of formatIds) {
       const f = formatMap.get(fid);
-      if (!f || !f.active) throw new Error("Invalid or inactive format selected");
+      if (!f || !f.active) throw new Error("Neispravan ili neaktivan format");
     }
 
-    // Check all paths exist in storage under orderRef/
-    const wantedPaths = new Set(data.items.map((i) => i.storage_path));
-    const { data: listed, error: lErr } = await supabaseAdmin.storage
-      .from(BUCKET)
-      .list(data.orderRef, { limit: 1000 });
-    if (lErr) throw new Error(lErr.message);
-    const presentPaths = new Set((listed ?? []).map((o) => `${data.orderRef}/${o.name}`));
-    for (const p of wantedPaths) {
-      if (!presentPaths.has(p)) throw new Error("Some uploaded images are missing");
+    // Verify uploaded paths exist
+    const wantedPaths = new Set(
+      data.items.map((i) => i.storage_path).filter(Boolean) as string[],
+    );
+    if (wantedPaths.size) {
+      const { data: listed, error: lErr } = await supabaseAdmin.storage
+        .from(BUCKET)
+        .list(data.orderRef, { limit: 1000 });
+      if (lErr) throw new Error(lErr.message);
+      const present = new Set((listed ?? []).map((o) => `${data.orderRef}/${o.name}`));
+      for (const p of wantedPaths) {
+        if (!present.has(p)) throw new Error("Neke otpremljene slike nedostaju");
+      }
     }
 
-    let total = 0;
+    let subtotal = 0;
     const itemsToInsert: Array<{
       format_id: string;
       format_name: string;
       price_per_unit: number;
       quantity: number;
       total_price: number;
-      storage_path: string;
+      storage_path: string | null;
     }> = [];
     for (const it of data.items) {
       const f = formatMap.get(it.format_id)!;
       const lineTotal = Number(f.price_km) * it.quantity;
-      total += lineTotal;
+      subtotal += lineTotal;
       itemsToInsert.push({
         format_id: f.id,
         format_name: f.name,
         price_per_unit: Number(f.price_km),
         quantity: it.quantity,
         total_price: Number(lineTotal.toFixed(2)),
-        storage_path: it.storage_path,
+        storage_path: it.storage_path ?? null,
       });
     }
 
-    // Insert order with id = orderRef
+    // Shipping + same day
+    const freeShip =
+      !!settings?.free_shipping_enabled &&
+      subtotal >= Number(settings?.free_shipping_threshold ?? 0);
+    const shipping_fee = freeShip ? 0 : Number(settings?.shipping_fee ?? 0);
+    const same_day = data.same_day && !!settings?.same_day_enabled;
+    const same_day_fee = same_day ? Number(settings?.same_day_price ?? 0) : 0;
+    const total = subtotal + shipping_fee + same_day_fee;
+
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")
       .insert({
@@ -141,29 +157,32 @@ export const submitOrder = createServerFn({ method: "POST" })
         postal_code: data.customer.postal_code || null,
         notes: data.customer.notes || null,
         total_price: Number(total.toFixed(2)),
+        shipping_fee: Number(shipping_fee.toFixed(2)),
+        same_day,
+        same_day_fee: Number(same_day_fee.toFixed(2)),
         status: "pending",
       })
-      .select("id")
+      .select("id, order_number")
       .single();
     if (oErr) throw new Error(oErr.message);
 
-    // Insert image rows (dedupe by path)
-    const uniquePaths = Array.from(new Set(data.items.map((i) => i.storage_path)));
-    const imageRows = uniquePaths.map((p) => ({
-      order_id: order.id,
-      storage_path: p,
-      status: "active",
-    }));
-    const { data: insertedImages, error: iErr } = await supabaseAdmin
-      .from("images")
-      .insert(imageRows)
-      .select("id, storage_path");
-    if (iErr) throw new Error(iErr.message);
-    const pathToImageId = new Map(insertedImages!.map((r) => [r.storage_path, r.id]));
+    // Image rows (only for items with storage_path)
+    const uniquePaths = Array.from(wantedPaths);
+    const pathToImageId = new Map<string, string>();
+    if (uniquePaths.length) {
+      const { data: insertedImages, error: iErr } = await supabaseAdmin
+        .from("images")
+        .insert(
+          uniquePaths.map((p) => ({ order_id: order.id, storage_path: p, status: "active" })),
+        )
+        .select("id, storage_path");
+      if (iErr) throw new Error(iErr.message);
+      for (const r of insertedImages!) pathToImageId.set(r.storage_path, r.id);
+    }
 
     const orderItems = itemsToInsert.map((it) => ({
       order_id: order.id,
-      image_id: pathToImageId.get(it.storage_path) ?? null,
+      image_id: it.storage_path ? pathToImageId.get(it.storage_path) ?? null : null,
       format_id: it.format_id,
       format_name: it.format_name,
       price_per_unit: it.price_per_unit,
@@ -173,7 +192,11 @@ export const submitOrder = createServerFn({ method: "POST" })
     const { error: oiErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (oiErr) throw new Error(oiErr.message);
 
-    return { orderId: order.id, total: Number(total.toFixed(2)) };
+    return {
+      orderId: order.id,
+      orderNumber: order.order_number,
+      total: Number(total.toFixed(2)),
+    };
   });
 
 // ===== Admin =====
@@ -185,7 +208,9 @@ export const adminListOrders = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin
       .from("orders")
-      .select("id, full_name, city, phone, total_price, status, created_at, shipped_at")
+      .select(
+        "id, order_number, full_name, city, phone, total_price, status, created_at, shipped_at, same_day",
+      )
       .order("created_at", { ascending: false })
       .limit(500);
     if (data.status && data.status !== "all") q = q.eq("status", data.status as any);
@@ -221,7 +246,6 @@ export const adminGetOrder = createServerFn({ method: "GET" })
       .order("uploaded_at", { ascending: true });
     if (imErr) throw new Error(imErr.message);
 
-    // signed URLs (1 hour)
     const paths = images!.filter((i) => i.status === "active").map((i) => i.storage_path);
     let signedMap: Record<string, string> = {};
     if (paths.length) {
@@ -291,15 +315,20 @@ export const adminDashboardStats = createServerFn({ method: "GET" })
       .from("orders")
       .select("status, total_price");
     if (error) throw new Error(error.message);
+    const { data: exp } = await supabaseAdmin.from("expenses").select("amount_km");
+    const revenue = rows!
+      .filter((r) => r.status !== "cancelled")
+      .reduce((s, r) => s + Number(r.total_price), 0);
+    const expensesTotal = (exp ?? []).reduce((s, r: any) => s + Number(r.amount_km), 0);
     const stats = {
       total: rows!.length,
       pending: rows!.filter((r) => r.status === "pending").length,
       inProgress: rows!.filter((r) => r.status === "in_progress").length,
       shipped: rows!.filter((r) => r.status === "shipped").length,
       completed: rows!.filter((r) => r.status === "completed").length,
-      revenue: rows!
-        .filter((r) => r.status !== "cancelled")
-        .reduce((s, r) => s + Number(r.total_price), 0),
+      revenue,
+      expenses: expensesTotal,
+      profit: revenue - expensesTotal,
     };
     return { stats };
   });

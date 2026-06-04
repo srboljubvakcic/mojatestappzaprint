@@ -13,8 +13,9 @@ import {
   Settings,
   LogOut,
   Camera,
+  Sliders,
+  Receipt,
 } from "lucide-react";
-import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { checkIsAdmin } from "@/lib/api/formats.functions";
@@ -70,15 +71,15 @@ function AdminLayout() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background sm:flex-row">
-      <aside className="border-b border-border bg-sidebar sm:w-64 sm:border-b-0 sm:border-r">
-        <div className="flex items-center gap-2 px-5 py-5">
-          <span className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-primary-foreground">
+    <div className="flex min-h-screen flex-col bg-[oklch(0.985_0.004_250)] sm:flex-row">
+      <aside className="flex flex-col border-b border-border bg-card/80 backdrop-blur-xl sm:w-64 sm:border-b-0 sm:border-r">
+        <div className="flex items-center gap-2.5 px-5 py-5">
+          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-primary to-[oklch(0.45_0.18_270)] text-primary-foreground shadow-[var(--shadow-soft)]">
             <Camera className="h-4 w-4" />
           </span>
           <div>
-            <div className="text-sm font-semibold">FotoPrint BiH</div>
-            <div className="text-[11px] text-muted-foreground">Admin</div>
+            <div className="text-sm font-semibold tracking-tight">FotoPrint BiH</div>
+            <div className="text-[11px] text-muted-foreground">Admin panel</div>
           </div>
         </div>
         <nav className="flex gap-1 px-3 pb-3 sm:flex-col">
@@ -89,10 +90,22 @@ function AdminLayout() {
             Narudžbe
           </NavItem>
           <NavItem to="/admin/formats" icon={<Settings className="h-4 w-4" />}>
-            Formati
+            Proizvodi
+          </NavItem>
+          <NavItem to="/admin/expenses" icon={<Receipt className="h-4 w-4" />}>
+            Troškovi
+          </NavItem>
+          <NavItem to="/admin/settings" icon={<Sliders className="h-4 w-4" />}>
+            Postavke
           </NavItem>
         </nav>
         <div className="mt-auto hidden border-t border-border p-3 sm:block">
+          <Link
+            to="/"
+            className="mb-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            ← Vrati se na sajt
+          </Link>
           <button
             onClick={logout}
             className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -123,7 +136,7 @@ function NavItem({
       activeOptions={{ exact: to === "/admin" }}
       activeProps={{
         className:
-          "flex items-center gap-2 rounded-xl bg-sidebar-accent px-3 py-2 text-sm font-medium text-sidebar-accent-foreground",
+          "flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium text-primary",
       }}
       inactiveProps={{
         className:

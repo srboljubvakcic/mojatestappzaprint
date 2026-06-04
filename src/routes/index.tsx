@@ -168,7 +168,7 @@ function HomePage() {
   const addExtra = (formatId: string) =>
     setExtras((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), formatId, quantity: 1 },
+      { id: crypto.randomUUID(), formatId, quantity: 1, notes: "" },
     ]);
   const updateExtra = (id: string, patch: Partial<ExtraItem>) =>
     setExtras((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));

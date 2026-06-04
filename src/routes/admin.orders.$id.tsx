@@ -224,76 +224,80 @@ function OrderDetail() {
             )}
           </Section>
 
-          <Section title="Stavke narudžbe">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-left text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    <th className="py-2">Format / Proizvod</th>
-                    <th className="py-2">Cijena</th>
-                    <th className="py-2">Kopije</th>
-                    <th className="py-2 text-right">Ukupno</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {items.map((it: any) => (
-                    <tr key={it.id}>
-                      <td className="py-2.5">
-                        <div>{it.format_name}</div>
-                        {it.notes && (
-                          <div className="mt-1 rounded-md bg-warning/10 px-2 py-1 text-xs text-warning-foreground">
-                            📝 {it.notes}
-                          </div>
+          <Section title={`Plan štampanja (${items.length})`}>
+            <ul className="divide-y divide-border">
+              {items.map((it: any) => {
+                const path = it.images?.storage_path;
+                const url = path ? signedUrls[path] : null;
+                const isDeleted = it.images?.status === "deleted";
+                return (
+                  <li key={it.id} className="flex items-center gap-4 py-3">
+                    <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-border bg-muted">
+                      {url ? (
+                        <a href={url} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
+                          <img src={url} alt="" className="h-full w-full object-cover" />
+                        </a>
+                      ) : (
+                        <FileImage className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{it.format_name}</span>
+                        {isDeleted && (
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase text-muted-foreground">
+                            slika obrisana
+                          </span>
                         )}
-                      </td>
-                      <td className="py-2.5 tabular-nums">
-                        {formatKM(Number(it.price_per_unit))}
-                      </td>
-                      <td className="py-2.5 tabular-nums font-medium">{it.quantity}</td>
-                      <td className="py-2.5 text-right font-medium tabular-nums">
+                      </div>
+                      <div className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                        {formatKM(Number(it.price_per_unit))} × {it.quantity} kopija
+                      </div>
+                      {it.notes && (
+                        <div className="mt-1.5 inline-block rounded-md bg-warning/10 px-2 py-1 text-xs text-warning-foreground">
+                          📝 {it.notes}
+                        </div>
+                      )}
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="grid h-9 min-w-[44px] place-items-center rounded-full bg-primary/10 px-3 text-sm font-bold tabular-nums text-primary">
+                        ×{it.quantity}
+                      </div>
+                      <div className="mt-1 text-sm font-semibold tabular-nums">
                         {formatKM(Number(it.total_price))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot className="text-sm">
-                  <tr>
-                    <td colSpan={3} className="pt-4 text-right text-muted-foreground">
-                      Međuzbir
-                    </td>
-                    <td className="pt-4 text-right tabular-nums">{formatKM(subtotal)}</td>
-                  </tr>
-                  <tr>
-                    <td colSpan={3} className="text-right text-muted-foreground">
-                      Dostava
-                    </td>
-                    <td className="text-right tabular-nums">
-                      {Number(order.shipping_fee) === 0
-                        ? "Besplatno"
-                        : formatKM(Number(order.shipping_fee))}
-                    </td>
-                  </tr>
-                  {Number(order.same_day_fee) > 0 && (
-                    <tr>
-                      <td colSpan={3} className="text-right text-muted-foreground">
-                        Same day print
-                      </td>
-                      <td className="text-right tabular-nums">
-                        {formatKM(Number(order.same_day_fee))}
-                      </td>
-                    </tr>
-                  )}
-                  <tr>
-                    <td colSpan={3} className="pt-2 text-right text-base font-medium">
-                      Ukupno
-                    </td>
-                    <td className="pt-2 text-right text-lg font-semibold tabular-nums">
-                      {formatKM(Number(order.total_price))}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <dl className="mt-5 space-y-1.5 border-t border-border pt-4 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <dt>Međuzbir</dt>
+                <dd className="tabular-nums">{formatKM(subtotal)}</dd>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <dt>Dostava</dt>
+                <dd className="tabular-nums">
+                  {Number(order.shipping_fee) === 0
+                    ? "Besplatno"
+                    : formatKM(Number(order.shipping_fee))}
+                </dd>
+              </div>
+              {Number(order.same_day_fee) > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>Same day print</dt>
+                  <dd className="tabular-nums">{formatKM(Number(order.same_day_fee))}</dd>
+                </div>
+              )}
+              <div className="flex items-baseline justify-between pt-2">
+                <dt className="text-base font-medium">Ukupno</dt>
+                <dd className="text-lg font-semibold tabular-nums">
+                  {formatKM(Number(order.total_price))}
+                </dd>
+              </div>
+            </dl>
           </Section>
         </div>
 

@@ -122,6 +122,7 @@ export const submitOrder = createServerFn({ method: "POST" })
       quantity: number;
       total_price: number;
       storage_path: string | null;
+      notes: string | null;
     }> = [];
     for (const it of data.items) {
       const f = formatMap.get(it.format_id)!;
@@ -134,6 +135,7 @@ export const submitOrder = createServerFn({ method: "POST" })
         quantity: it.quantity,
         total_price: Number(lineTotal.toFixed(2)),
         storage_path: it.storage_path ?? null,
+        notes: it.notes?.trim() || null,
       });
     }
 

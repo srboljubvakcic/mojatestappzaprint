@@ -10,33 +10,44 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicHooksCleanupImagesRouteImport } from './routes/api/public/hooks/cleanup-images'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksCleanupImagesRoute =
+  ApiPublicHooksCleanupImagesRouteImport.update({
+    id: '/api/public/hooks/cleanup-images',
+    path: '/api/public/hooks/cleanup-images',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/hooks/cleanup-images'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/hooks/cleanup-images'
+  id: '__root__' | '/' | '/api/public/hooks/cleanup-images'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicHooksCleanupImagesRoute: typeof ApiPublicHooksCleanupImagesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,12 +59,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/cleanup-images': {
+      id: '/api/public/hooks/cleanup-images'
+      path: '/api/public/hooks/cleanup-images'
+      fullPath: '/api/public/hooks/cleanup-images'
+      preLoaderRoute: typeof ApiPublicHooksCleanupImagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicHooksCleanupImagesRoute: ApiPublicHooksCleanupImagesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

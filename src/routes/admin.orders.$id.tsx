@@ -128,25 +128,28 @@ function OrderDetail() {
             {new Date(order.created_at).toLocaleString("bs-BA")}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_STYLES[order.status as keyof typeof STATUS_STYLES]}`}
-          >
-            {STATUS_LABEL[order.status as keyof typeof STATUS_LABEL]}
-          </span>
-          <Select value={order.status} onValueChange={(v) => statusMut.mutate(v)}>
-            <SelectTrigger className="w-44 rounded-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_ORDER.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {STATUS_LABEL[s]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      </div>
+
+      {/* Status tabs */}
+      <div className="mt-5 flex flex-wrap gap-1.5 rounded-2xl border border-border bg-card p-1.5 shadow-[var(--shadow-soft)]">
+        {STATUS_ORDER.map((s) => {
+          const active = order.status === s;
+          return (
+            <button
+              key={s}
+              type="button"
+              disabled={statusMut.isPending}
+              onClick={() => !active && statusMut.mutate(s)}
+              className={
+                active
+                  ? `rounded-xl px-3.5 py-1.5 text-xs font-semibold ${STATUS_STYLES[s]}`
+                  : "rounded-xl px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+              }
+            >
+              {STATUS_LABEL[s]}
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">

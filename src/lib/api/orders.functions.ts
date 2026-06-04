@@ -228,9 +228,9 @@ export const adminGetOrder = createServerFn({ method: "GET" })
       const { data: signed } = await supabaseAdmin.storage
         .from(BUCKET)
         .createSignedUrls(paths, 3600);
-      signedMap = Object.fromEntries(
-        (signed ?? []).map((s) => [s.path ?? "", s.signedUrl]),
-      );
+      for (const s of signed ?? []) {
+        if (s.path && s.signedUrl) signedMap[s.path] = s.signedUrl;
+      }
     }
     return { order, items, images, signedUrls: signedMap };
   });

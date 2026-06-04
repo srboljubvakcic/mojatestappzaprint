@@ -9,38 +9,155 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as OrderIdRouteImport } from './routes/order.$id'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminFormatsRouteImport } from './routes/admin.formats'
+import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
+import { Route as ApiPublicHooksCleanupImagesRouteImport } from './routes/api/public/hooks/cleanup-images'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const OrderIdRoute = OrderIdRouteImport.update({
+  id: '/order/$id',
+  path: '/order/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFormatsRoute = AdminFormatsRouteImport.update({
+  id: '/formats',
+  path: '/formats',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersIdRoute = AdminOrdersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminOrdersRoute,
+} as any)
+const ApiPublicHooksCleanupImagesRoute =
+  ApiPublicHooksCleanupImagesRouteImport.update({
+    id: '/api/public/hooks/cleanup-images',
+    path: '/api/public/hooks/cleanup-images',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/admin/formats': typeof AdminFormatsRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
+  '/order/$id': typeof OrderIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/admin/formats': typeof AdminFormatsRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
+  '/order/$id': typeof OrderIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/admin/formats': typeof AdminFormatsRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
+  '/order/$id': typeof OrderIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/admin/formats'
+    | '/admin/orders'
+    | '/order/$id'
+    | '/admin/'
+    | '/admin/orders/$id'
+    | '/api/public/hooks/cleanup-images'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/admin/formats'
+    | '/admin/orders'
+    | '/order/$id'
+    | '/admin'
+    | '/admin/orders/$id'
+    | '/api/public/hooks/cleanup-images'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/admin/formats'
+    | '/admin/orders'
+    | '/order/$id'
+    | '/admin/'
+    | '/admin/orders/$id'
+    | '/api/public/hooks/cleanup-images'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  OrderIdRoute: typeof OrderIdRoute
+  ApiPublicHooksCleanupImagesRoute: typeof ApiPublicHooksCleanupImagesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +165,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/order/$id': {
+      id: '/order/$id'
+      path: '/order/$id'
+      fullPath: '/order/$id'
+      preLoaderRoute: typeof OrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/formats': {
+      id: '/admin/formats'
+      path: '/formats'
+      fullPath: '/admin/formats'
+      preLoaderRoute: typeof AdminFormatsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders/$id': {
+      id: '/admin/orders/$id'
+      path: '/$id'
+      fullPath: '/admin/orders/$id'
+      preLoaderRoute: typeof AdminOrdersIdRouteImport
+      parentRoute: typeof AdminOrdersRoute
+    }
+    '/api/public/hooks/cleanup-images': {
+      id: '/api/public/hooks/cleanup-images'
+      path: '/api/public/hooks/cleanup-images'
+      fullPath: '/api/public/hooks/cleanup-images'
+      preLoaderRoute: typeof ApiPublicHooksCleanupImagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AdminOrdersRouteChildren {
+  AdminOrdersIdRoute: typeof AdminOrdersIdRoute
+}
+
+const AdminOrdersRouteChildren: AdminOrdersRouteChildren = {
+  AdminOrdersIdRoute: AdminOrdersIdRoute,
+}
+
+const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
+  AdminOrdersRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminFormatsRoute: typeof AdminFormatsRoute
+  AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminFormatsRoute: AdminFormatsRoute,
+  AdminOrdersRoute: AdminOrdersRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  AuthRoute: AuthRoute,
+  OrderIdRoute: OrderIdRoute,
+  ApiPublicHooksCleanupImagesRoute: ApiPublicHooksCleanupImagesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

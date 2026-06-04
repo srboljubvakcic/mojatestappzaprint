@@ -14,9 +14,70 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          free_shipping_enabled: boolean
+          free_shipping_threshold: number
+          id: number
+          same_day_enabled: boolean
+          same_day_price: number
+          shipping_fee: number
+          updated_at: string
+        }
+        Insert: {
+          free_shipping_enabled?: boolean
+          free_shipping_threshold?: number
+          id?: number
+          same_day_enabled?: boolean
+          same_day_price?: number
+          shipping_fee?: number
+          updated_at?: string
+        }
+        Update: {
+          free_shipping_enabled?: boolean
+          free_shipping_threshold?: number
+          id?: number
+          same_day_enabled?: boolean
+          same_day_price?: number
+          shipping_fee?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount_km: number
+          category: string
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          occurred_at: string
+        }
+        Insert: {
+          amount_km: number
+          category?: string
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          occurred_at?: string
+        }
+        Update: {
+          amount_km?: number
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          occurred_at?: string
+        }
+        Relationships: []
+      }
       formats: {
         Row: {
           active: boolean
+          category: string
           created_at: string
           description: string | null
           id: string
@@ -27,6 +88,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          category?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -37,6 +99,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          category?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -146,9 +209,13 @@ export type Database = {
           full_name: string
           id: string
           notes: string | null
+          order_number: number
           phone: string
           postal_code: string | null
+          same_day: boolean
+          same_day_fee: number
           shipped_at: string | null
+          shipping_fee: number
           status: Database["public"]["Enums"]["order_status"]
           total_price: number
         }
@@ -160,9 +227,13 @@ export type Database = {
           full_name: string
           id?: string
           notes?: string | null
+          order_number?: number
           phone: string
           postal_code?: string | null
+          same_day?: boolean
+          same_day_fee?: number
           shipped_at?: string | null
+          shipping_fee?: number
           status?: Database["public"]["Enums"]["order_status"]
           total_price?: number
         }
@@ -174,9 +245,13 @@ export type Database = {
           full_name?: string
           id?: string
           notes?: string | null
+          order_number?: number
           phone?: string
           postal_code?: string | null
+          same_day?: boolean
+          same_day_fee?: number
           shipped_at?: string | null
+          shipping_fee?: number
           status?: Database["public"]["Enums"]["order_status"]
           total_price?: number
         }

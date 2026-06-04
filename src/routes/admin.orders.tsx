@@ -2,10 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Zap } from "lucide-react";
 
 import { adminListOrders } from "@/lib/api/orders.functions";
-import { formatKM } from "@/lib/format";
+import { formatKM, formatOrderNo } from "@/lib/format";
 import {
   Select,
   SelectContent,
@@ -54,18 +54,25 @@ function OrdersList() {
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-soft)]">
         {isLoading ? (
-          <div className="p-10 text-center text-sm text-muted-foreground">Učitavanje...</div>
+          <div className="p-10 text-center text-sm text-muted-foreground">
+            Učitavanje...
+          </div>
         ) : !data?.orders.length ? (
-          <div className="p-10 text-center text-sm text-muted-foreground">Nema narudžbi.</div>
+          <div className="p-10 text-center text-sm text-muted-foreground">
+            Nema narudžbi.
+          </div>
         ) : (
           <ul className="divide-y divide-border">
-            {data.orders.map((o) => (
+            {data.orders.map((o: any) => (
               <li key={o.id}>
                 <Link
                   to="/admin/orders/$id"
                   params={{ id: o.id }}
-                  className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-accent/40"
+                  className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-accent/40"
                 >
+                  <div className="grid h-11 w-14 shrink-0 place-items-center rounded-xl bg-primary/5 font-mono text-[11px] font-semibold tabular-nums text-primary">
+                    {formatOrderNo(o.order_number)}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-medium">{o.full_name}</span>
@@ -74,6 +81,11 @@ function OrdersList() {
                       >
                         {STATUS_LABEL[o.status as keyof typeof STATUS_LABEL] ?? o.status}
                       </span>
+                      {o.same_day && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-medium text-warning-foreground">
+                          <Zap className="h-3 w-3" /> Same day
+                        </span>
+                      )}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
                       {o.city} · {o.phone} ·{" "}

@@ -734,5 +734,3 @@ function ExtraGroup({
   );
 }
 
-// silence unused import warning if package icon ever unused
-void Package;

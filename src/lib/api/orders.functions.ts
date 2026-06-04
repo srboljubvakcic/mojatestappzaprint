@@ -203,6 +203,24 @@ export const submitOrder = createServerFn({ method: "POST" })
     };
   });
 
+
+// ===== Public: fetch confirmation summary (id acts as access token) =====
+export const getOrderConfirmation = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .select(
+        "id, order_number, full_name, phone, email, address, city, postal_code, total_price, shipping_fee, same_day, same_day_fee, status, created_at",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!order) throw new Error("Narudžba nije pronađena");
+    return { order };
+  });
+
 // ===== Admin =====
 export const adminListOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

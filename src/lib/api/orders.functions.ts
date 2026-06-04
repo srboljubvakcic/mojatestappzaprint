@@ -191,6 +191,7 @@ export const submitOrder = createServerFn({ method: "POST" })
       price_per_unit: it.price_per_unit,
       quantity: it.quantity,
       total_price: it.total_price,
+      notes: it.notes,
     }));
     const { error: oiErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (oiErr) throw new Error(oiErr.message);

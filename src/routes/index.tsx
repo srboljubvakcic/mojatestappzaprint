@@ -61,7 +61,7 @@ type UploadedImage = {
   quantity: number;
 };
 
-type ExtraItem = { id: string; formatId: string; quantity: number };
+type ExtraItem = { id: string; formatId: string; quantity: number; notes: string };
 
 function HomePage() {
   const navigate = useNavigate();

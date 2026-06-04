@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as ApiPublicHooksCleanupImagesRouteImport } from './routes/api/public/hooks/cleanup-images'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderIdRoute = OrderIdRouteImport.update({
+  id: '/order/$id',
+  path: '/order/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicHooksCleanupImagesRoute =
@@ -26,27 +32,31 @@ const ApiPublicHooksCleanupImagesRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/order/$id': typeof OrderIdRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/order/$id': typeof OrderIdRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/order/$id': typeof OrderIdRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/hooks/cleanup-images'
+  fullPaths: '/' | '/order/$id' | '/api/public/hooks/cleanup-images'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/hooks/cleanup-images'
-  id: '__root__' | '/' | '/api/public/hooks/cleanup-images'
+  to: '/' | '/order/$id' | '/api/public/hooks/cleanup-images'
+  id: '__root__' | '/' | '/order/$id' | '/api/public/hooks/cleanup-images'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  OrderIdRoute: typeof OrderIdRoute
   ApiPublicHooksCleanupImagesRoute: typeof ApiPublicHooksCleanupImagesRoute
 }
 
@@ -57,6 +67,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order/$id': {
+      id: '/order/$id'
+      path: '/order/$id'
+      fullPath: '/order/$id'
+      preLoaderRoute: typeof OrderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/cleanup-images': {
@@ -71,8 +88,19 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  OrderIdRoute: OrderIdRoute,
   ApiPublicHooksCleanupImagesRoute: ApiPublicHooksCleanupImagesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

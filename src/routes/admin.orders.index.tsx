@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { STATUS_LABEL, STATUS_STYLES } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/orders")({
+export const Route = createFileRoute("/admin/orders/")({
   component: OrdersList,
 });
 

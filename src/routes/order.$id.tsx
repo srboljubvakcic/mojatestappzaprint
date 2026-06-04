@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, Package } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { CheckCircle2, Package, MapPin, Phone, Mail, User } from "lucide-react";
 import { z } from "zod";
 
-import { formatKM } from "@/lib/format";
+import { formatKM, formatOrderNo } from "@/lib/format";
+import { getOrderConfirmation } from "@/lib/api/orders.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { Button } from "@/components/ui/button";
 
@@ -16,7 +19,12 @@ export const Route = createFileRoute("/order/$id")({
 
 function OrderConfirmation() {
   const { id } = Route.useParams();
-  const { total } = Route.useSearch();
+  const fetchFn = useServerFn(getOrderConfirmation);
+  const { data, isLoading } = useQuery({
+    queryKey: ["order-confirmation", id],
+    queryFn: () => fetchFn({ data: { id } }),
+  });
+  const order = data?.order;
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,21 +42,44 @@ function OrderConfirmation() {
           </p>
 
           <div className="mt-8 rounded-2xl bg-secondary p-5 text-left">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-              <Package className="h-3.5 w-3.5" /> Referenca narudžbe
-            </div>
-            <div className="mt-1 break-all font-mono text-[11px] text-muted-foreground">
-              {id}
-            </div>
-            {typeof total === "number" && (
-              <div className="mt-4 flex items-baseline justify-between border-t border-border pt-3">
-                <span className="text-sm text-muted-foreground">Ukupno</span>
-                <span className="text-xl font-semibold tabular-nums">
-                  {formatKM(total)}
-                </span>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                  <Package className="h-3.5 w-3.5" /> Broj narudžbe
+                </div>
+                <div className="mt-1 font-mono text-2xl font-semibold tabular-nums tracking-tight">
+                  {isLoading ? "…" : formatOrderNo(order?.order_number)}
+                </div>
               </div>
-            )}
+              <div className="text-right">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Ukupno
+                </div>
+                <div className="mt-1 text-2xl font-semibold tabular-nums">
+                  {formatKM(Number(order?.total_price ?? 0))}
+                </div>
+              </div>
+            </div>
           </div>
+
+          {order && (
+            <div className="mt-4 rounded-2xl border border-border bg-background p-5 text-left">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Podaci za dostavu
+              </div>
+              <ul className="mt-3 space-y-2 text-sm">
+                <InfoRow icon={<User className="h-3.5 w-3.5" />} value={order.full_name} />
+                <InfoRow icon={<Phone className="h-3.5 w-3.5" />} value={order.phone} />
+                {order.email && (
+                  <InfoRow icon={<Mail className="h-3.5 w-3.5" />} value={order.email} />
+                )}
+                <InfoRow
+                  icon={<MapPin className="h-3.5 w-3.5" />}
+                  value={`${order.address}, ${order.city}${order.postal_code ? " · " + order.postal_code : ""}`}
+                />
+              </ul>
+            </div>
+          )}
 
           <Button asChild size="lg" className="mt-8 rounded-full px-6">
             <Link to="/">Nova narudžba</Link>
@@ -57,5 +88,16 @@ function OrderConfirmation() {
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+function InfoRow({ icon, value }: { icon: React.ReactNode; value: string }) {
+  return (
+    <li className="flex items-start gap-2.5">
+      <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+        {icon}
+      </span>
+      <span className="text-foreground">{value}</span>
+    </li>
   );
 }

@@ -14,16 +14,217 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      formats: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price_km: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price_km: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price_km?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      images: {
+        Row: {
+          delete_after: string | null
+          id: string
+          order_id: string
+          status: string
+          storage_path: string
+          uploaded_at: string
+        }
+        Insert: {
+          delete_after?: string | null
+          id?: string
+          order_id: string
+          status?: string
+          storage_path: string
+          uploaded_at?: string
+        }
+        Update: {
+          delete_after?: string | null
+          id?: string
+          order_id?: string
+          status?: string
+          storage_path?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "images_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_items: {
+        Row: {
+          format_id: string | null
+          format_name: string
+          id: string
+          image_id: string | null
+          order_id: string
+          price_per_unit: number
+          quantity: number
+          total_price: number
+        }
+        Insert: {
+          format_id?: string | null
+          format_name: string
+          id?: string
+          image_id?: string | null
+          order_id: string
+          price_per_unit: number
+          quantity: number
+          total_price: number
+        }
+        Update: {
+          format_id?: string | null
+          format_name?: string
+          id?: string
+          image_id?: string | null
+          order_id?: string
+          price_per_unit?: number
+          quantity?: number
+          total_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_format_id_fkey"
+            columns: ["format_id"]
+            isOneToOne: false
+            referencedRelation: "formats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "images"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string
+          postal_code: string | null
+          shipped_at: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          total_price: number
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone: string
+          postal_code?: string | null
+          shipped_at?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_price?: number
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          postal_code?: string | null
+          shipped_at?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_price?: number
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      order_status:
+        | "pending"
+        | "in_progress"
+        | "printed"
+        | "shipped"
+        | "completed"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +351,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      order_status: [
+        "pending",
+        "in_progress",
+        "printed",
+        "shipped",
+        "completed",
+        "cancelled",
+      ],
+    },
   },
 } as const

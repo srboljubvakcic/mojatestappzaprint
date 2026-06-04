@@ -69,6 +69,7 @@ export const submitOrder = createServerFn({ method: "POST" })
             storage_path: z.string().min(3).max(400).optional().nullable(),
             format_id: z.string().uuid(),
             quantity: z.number().int().min(1).max(500),
+            notes: z.string().trim().max(500).optional().nullable(),
           }),
         )
         .min(1)

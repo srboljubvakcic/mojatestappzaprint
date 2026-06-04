@@ -17,7 +17,6 @@ import {
   Zap,
   BookOpen,
   Gift,
-  Package,
 } from "lucide-react";
 
 import { listActiveFormats, getPublicSettings } from "@/lib/api/formats.functions";

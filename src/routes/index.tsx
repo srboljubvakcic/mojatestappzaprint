@@ -218,11 +218,13 @@ function HomePage() {
           storage_path: i.storagePath!,
           format_id: i.formatId,
           quantity: i.quantity,
+          notes: null as string | null,
         })),
         ...extras.map((e) => ({
           storage_path: null,
           format_id: e.formatId,
           quantity: e.quantity,
+          notes: e.notes?.trim() || null,
         })),
       ];
       const { orderId } = await submitOrderFn({

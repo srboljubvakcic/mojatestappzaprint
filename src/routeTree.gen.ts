@@ -15,6 +15,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminFormatsRouteImport } from './routes/admin.formats'
+import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
 import { Route as ApiPublicHooksCleanupImagesRouteImport } from './routes/api/public/hooks/cleanup-images'
 
 const AuthRoute = AuthRouteImport.update({
@@ -47,6 +49,16 @@ const AdminOrdersRoute = AdminOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFormatsRoute = AdminFormatsRouteImport.update({
+  id: '/formats',
+  path: '/formats',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersIdRoute = AdminOrdersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminOrdersRoute,
+} as any)
 const ApiPublicHooksCleanupImagesRoute =
   ApiPublicHooksCleanupImagesRouteImport.update({
     id: '/api/public/hooks/cleanup-images',
@@ -58,17 +70,21 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
-  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/formats': typeof AdminFormatsRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/order/$id': typeof OrderIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/formats': typeof AdminFormatsRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/order/$id': typeof OrderIdRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesById {
@@ -76,9 +92,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
-  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/formats': typeof AdminFormatsRoute
+  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/order/$id': typeof OrderIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/orders/$id': typeof AdminOrdersIdRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRouteTypes {
@@ -87,26 +105,32 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/formats'
     | '/admin/orders'
     | '/order/$id'
     | '/admin/'
+    | '/admin/orders/$id'
     | '/api/public/hooks/cleanup-images'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/admin/formats'
     | '/admin/orders'
     | '/order/$id'
     | '/admin'
+    | '/admin/orders/$id'
     | '/api/public/hooks/cleanup-images'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/formats'
     | '/admin/orders'
     | '/order/$id'
     | '/admin/'
+    | '/admin/orders/$id'
     | '/api/public/hooks/cleanup-images'
   fileRoutesById: FileRoutesById
 }
@@ -162,6 +186,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/formats': {
+      id: '/admin/formats'
+      path: '/formats'
+      fullPath: '/admin/formats'
+      preLoaderRoute: typeof AdminFormatsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders/$id': {
+      id: '/admin/orders/$id'
+      path: '/$id'
+      fullPath: '/admin/orders/$id'
+      preLoaderRoute: typeof AdminOrdersIdRouteImport
+      parentRoute: typeof AdminOrdersRoute
+    }
     '/api/public/hooks/cleanup-images': {
       id: '/api/public/hooks/cleanup-images'
       path: '/api/public/hooks/cleanup-images'
@@ -172,13 +210,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminOrdersRouteChildren {
+  AdminOrdersIdRoute: typeof AdminOrdersIdRoute
+}
+
+const AdminOrdersRouteChildren: AdminOrdersRouteChildren = {
+  AdminOrdersIdRoute: AdminOrdersIdRoute,
+}
+
+const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
+  AdminOrdersRouteChildren,
+)
+
 interface AdminRouteChildren {
-  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminFormatsRoute: typeof AdminFormatsRoute
+  AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminOrdersRoute: AdminOrdersRoute,
+  AdminFormatsRoute: AdminFormatsRoute,
+  AdminOrdersRoute: AdminOrdersRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }
 

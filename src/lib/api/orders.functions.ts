@@ -69,6 +69,7 @@ export const submitOrder = createServerFn({ method: "POST" })
             storage_path: z.string().min(3).max(400).optional().nullable(),
             format_id: z.string().uuid(),
             quantity: z.number().int().min(1).max(500),
+            notes: z.string().trim().max(500).optional().nullable(),
           }),
         )
         .min(1)
@@ -121,6 +122,7 @@ export const submitOrder = createServerFn({ method: "POST" })
       quantity: number;
       total_price: number;
       storage_path: string | null;
+      notes: string | null;
     }> = [];
     for (const it of data.items) {
       const f = formatMap.get(it.format_id)!;
@@ -133,6 +135,7 @@ export const submitOrder = createServerFn({ method: "POST" })
         quantity: it.quantity,
         total_price: Number(lineTotal.toFixed(2)),
         storage_path: it.storage_path ?? null,
+        notes: it.notes?.trim() || null,
       });
     }
 
@@ -188,6 +191,7 @@ export const submitOrder = createServerFn({ method: "POST" })
       price_per_unit: it.price_per_unit,
       quantity: it.quantity,
       total_price: it.total_price,
+      notes: it.notes,
     }));
     const { error: oiErr } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (oiErr) throw new Error(oiErr.message);
@@ -197,6 +201,24 @@ export const submitOrder = createServerFn({ method: "POST" })
       orderNumber: order.order_number,
       total: Number(total.toFixed(2)),
     };
+  });
+
+
+// ===== Public: fetch confirmation summary (id acts as access token) =====
+export const getOrderConfirmation = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .select(
+        "id, order_number, full_name, phone, email, address, city, postal_code, total_price, shipping_fee, same_day, same_day_fee, status, created_at",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!order) throw new Error("Narudžba nije pronađena");
+    return { order };
   });
 
 // ===== Admin =====

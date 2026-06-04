@@ -61,7 +61,7 @@ type UploadedImage = {
   quantity: number;
 };
 
-type ExtraItem = { id: string; formatId: string; quantity: number };
+type ExtraItem = { id: string; formatId: string; quantity: number; notes: string };
 
 function HomePage() {
   const navigate = useNavigate();
@@ -168,7 +168,7 @@ function HomePage() {
   const addExtra = (formatId: string) =>
     setExtras((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), formatId, quantity: 1 },
+      { id: crypto.randomUUID(), formatId, quantity: 1, notes: "" },
     ]);
   const updateExtra = (id: string, patch: Partial<ExtraItem>) =>
     setExtras((prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)));
@@ -218,11 +218,13 @@ function HomePage() {
           storage_path: i.storagePath!,
           format_id: i.formatId,
           quantity: i.quantity,
+          notes: null as string | null,
         })),
         ...extras.map((e) => ({
           storage_path: null,
           format_id: e.formatId,
           quantity: e.quantity,
+          notes: e.notes?.trim() || null,
         })),
       ];
       const { orderId } = await submitOrderFn({
@@ -415,32 +417,40 @@ function HomePage() {
             )}
           </div>
           {extras.length > 0 && (
-            <div className="mt-5 space-y-2">
+            <div className="mt-5 space-y-3">
               {extras.map((ex) => {
                 const f = formats.find((f: any) => f.id === ex.formatId);
                 if (!f) return null;
                 return (
                   <div
                     key={ex.id}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]"
+                    className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-soft)]"
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium">{f.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {formatKM(Number(f.price_km))} po komadu
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium">{f.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {formatKM(Number(f.price_km))} po komadu
+                        </div>
                       </div>
+                      <QtyInput
+                        value={ex.quantity}
+                        onChange={(q) => updateExtra(ex.id, { quantity: q })}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExtra(ex.id)}
+                        className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
-                    <QtyInput
-                      value={ex.quantity}
-                      onChange={(q) => updateExtra(ex.id, { quantity: q })}
+                    <Textarea
+                      value={ex.notes}
+                      onChange={(e) => updateExtra(ex.id, { notes: e.target.value })}
+                      placeholder="Napomena za ovaj proizvod (npr. broj strana, povod, motiv, pakovanje…)"
+                      className="mt-3 min-h-[60px] rounded-xl text-sm"
                     />
-                    <button
-                      type="button"
-                      onClick={() => removeExtra(ex.id)}
-                      className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
                   </div>
                 );
               })}

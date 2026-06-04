@@ -151,6 +151,7 @@ export type Database = {
           format_name: string
           id: string
           image_id: string | null
+          notes: string | null
           order_id: string
           price_per_unit: number
           quantity: number
@@ -161,6 +162,7 @@ export type Database = {
           format_name: string
           id?: string
           image_id?: string | null
+          notes?: string | null
           order_id: string
           price_per_unit: number
           quantity: number
@@ -171,6 +173,7 @@ export type Database = {
           format_name?: string
           id?: string
           image_id?: string | null
+          notes?: string | null
           order_id?: string
           price_per_unit?: number
           quantity?: number

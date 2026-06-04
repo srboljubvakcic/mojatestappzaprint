@@ -15,9 +15,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as OrderIdRouteImport } from './routes/order.$id'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminFormatsRouteImport } from './routes/admin.formats'
 import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
+import { Route as AdminOrdersIndexRouteImport } from './routes/admin.orders.index'
 import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
 import { Route as ApiPublicHooksCleanupImagesRouteImport } from './routes/api/public/hooks/cleanup-images'
 
@@ -51,11 +51,6 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminOrdersRoute = AdminOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminFormatsRoute = AdminFormatsRouteImport.update({
   id: '/formats',
   path: '/formats',
@@ -66,10 +61,15 @@ const AdminExpensesRoute = AdminExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOrdersIdRoute = AdminOrdersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AdminOrdersRoute,
+  id: '/orders/$id',
+  path: '/orders/$id',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ApiPublicHooksCleanupImagesRoute =
   ApiPublicHooksCleanupImagesRouteImport.update({
@@ -84,11 +84,11 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/formats': typeof AdminFormatsRoute
-  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/settings': typeof AdminSettingsRoute
   '/order/$id': typeof OrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesByTo {
@@ -96,11 +96,11 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/formats': typeof AdminFormatsRoute
-  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/settings': typeof AdminSettingsRoute
   '/order/$id': typeof OrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/admin/orders': typeof AdminOrdersIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesById {
@@ -110,11 +110,11 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/formats': typeof AdminFormatsRoute
-  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/settings': typeof AdminSettingsRoute
   '/order/$id': typeof OrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/orders/$id': typeof AdminOrdersIdRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRouteTypes {
@@ -125,11 +125,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin/expenses'
     | '/admin/formats'
-    | '/admin/orders'
     | '/admin/settings'
     | '/order/$id'
     | '/admin/'
     | '/admin/orders/$id'
+    | '/admin/orders/'
     | '/api/public/hooks/cleanup-images'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -137,11 +137,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin/expenses'
     | '/admin/formats'
-    | '/admin/orders'
     | '/admin/settings'
     | '/order/$id'
     | '/admin'
     | '/admin/orders/$id'
+    | '/admin/orders'
     | '/api/public/hooks/cleanup-images'
   id:
     | '__root__'
@@ -150,11 +150,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin/expenses'
     | '/admin/formats'
-    | '/admin/orders'
     | '/admin/settings'
     | '/order/$id'
     | '/admin/'
     | '/admin/orders/$id'
+    | '/admin/orders/'
     | '/api/public/hooks/cleanup-images'
   fileRoutesById: FileRoutesById
 }
@@ -210,13 +210,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/orders': {
-      id: '/admin/orders'
-      path: '/orders'
-      fullPath: '/admin/orders'
-      preLoaderRoute: typeof AdminOrdersRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/formats': {
       id: '/admin/formats'
       path: '/formats'
@@ -231,12 +224,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminExpensesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/orders/': {
+      id: '/admin/orders/'
+      path: '/orders'
+      fullPath: '/admin/orders/'
+      preLoaderRoute: typeof AdminOrdersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/orders/$id': {
       id: '/admin/orders/$id'
-      path: '/$id'
+      path: '/orders/$id'
       fullPath: '/admin/orders/$id'
       preLoaderRoute: typeof AdminOrdersIdRouteImport
-      parentRoute: typeof AdminOrdersRoute
+      parentRoute: typeof AdminRoute
     }
     '/api/public/hooks/cleanup-images': {
       id: '/api/public/hooks/cleanup-images'
@@ -248,32 +248,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminOrdersRouteChildren {
-  AdminOrdersIdRoute: typeof AdminOrdersIdRoute
-}
-
-const AdminOrdersRouteChildren: AdminOrdersRouteChildren = {
-  AdminOrdersIdRoute: AdminOrdersIdRoute,
-}
-
-const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
-  AdminOrdersRouteChildren,
-)
-
 interface AdminRouteChildren {
   AdminExpensesRoute: typeof AdminExpensesRoute
   AdminFormatsRoute: typeof AdminFormatsRoute
-  AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminOrdersIdRoute: typeof AdminOrdersIdRoute
+  AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminExpensesRoute: AdminExpensesRoute,
   AdminFormatsRoute: AdminFormatsRoute,
-  AdminOrdersRoute: AdminOrdersRouteWithChildren,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminOrdersIdRoute: AdminOrdersIdRoute,
+  AdminOrdersIndexRoute: AdminOrdersIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

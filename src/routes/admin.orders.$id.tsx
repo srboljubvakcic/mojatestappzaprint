@@ -235,7 +235,14 @@ function OrderDetail() {
                 <tbody className="divide-y divide-border">
                   {items.map((it: any) => (
                     <tr key={it.id}>
-                      <td className="py-2.5">{it.format_name}</td>
+                      <td className="py-2.5">
+                        <div>{it.format_name}</div>
+                        {it.notes && (
+                          <div className="mt-1 rounded-md bg-warning/10 px-2 py-1 text-xs text-warning-foreground">
+                            📝 {it.notes}
+                          </div>
+                        )}
+                      </td>
                       <td className="py-2.5 tabular-nums">
                         {formatKM(Number(it.price_per_unit))}
                       </td>

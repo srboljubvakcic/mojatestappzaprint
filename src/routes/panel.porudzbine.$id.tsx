@@ -361,22 +361,74 @@ function OrderDetail() {
         </div>
 
         <aside className="space-y-4">
-          <Section title="Dostava">
-            <dl className="space-y-2 text-sm">
-              <Field label="Ime" value={order.full_name} />
-              <Field label="Telefon" value={order.phone} />
-              <Field label="Email" value={order.email || "—"} />
-              <Field label="Adresa" value={order.address} />
-              <Field label="Grad" value={order.city} />
-              <Field label="Pošt. broj" value={order.postal_code || "—"} />
-              {order.notes && <Field label="Napomena" value={order.notes} />}
-              {order.shipped_at && (
-                <Field
-                  label="Poslato"
-                  value={new Date(order.shipped_at).toLocaleString("bs-BA")}
-                />
-              )}
-            </dl>
+          <Section
+            title="Dostava"
+            actions={
+              editing ? (
+                <div className="flex gap-1.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => setEditing(false)}
+                  >
+                    <X className="mr-1 h-3 w-3" /> Otkaži
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="rounded-full"
+                    disabled={updateMut.isPending}
+                    onClick={() => updateMut.mutate()}
+                  >
+                    <Save className="mr-1 h-3 w-3" /> Sačuvaj
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={() => setEditing(true)}
+                >
+                  <Pencil className="mr-1 h-3 w-3" /> Izmijeni
+                </Button>
+              )
+            }
+          >
+            {editing ? (
+              <div className="space-y-3 text-sm">
+                <EditField label="Ime" value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} />
+                <EditField label="Telefon" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+                <EditField label="Email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
+                <EditField label="Adresa" value={form.address} onChange={(v) => setForm({ ...form, address: v })} />
+                <EditField label="Grad" value={form.city} onChange={(v) => setForm({ ...form, city: v })} />
+                <EditField label="Pošt. broj" value={form.postal_code} onChange={(v) => setForm({ ...form, postal_code: v })} />
+                <div>
+                  <Label className="text-xs text-muted-foreground">Napomena</Label>
+                  <Textarea
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    className="mt-1 min-h-[70px] rounded-xl text-sm"
+                  />
+                </div>
+              </div>
+            ) : (
+              <dl className="space-y-2 text-sm">
+                <Field label="Ime" value={order.full_name} />
+                <Field label="Telefon" value={order.phone} />
+                <Field label="Email" value={order.email || "—"} />
+                <Field label="Adresa" value={order.address} />
+                <Field label="Grad" value={order.city} />
+                <Field label="Pošt. broj" value={order.postal_code || "—"} />
+                {order.notes && <Field label="Napomena" value={order.notes} />}
+                {order.shipped_at && (
+                  <Field
+                    label="Poslato"
+                    value={new Date(order.shipped_at).toLocaleString("bs-BA")}
+                  />
+                )}
+              </dl>
+            )}
           </Section>
         </aside>
       </div>

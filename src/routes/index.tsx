@@ -158,7 +158,8 @@ function HomePage() {
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: { "image/*": [] },
-    maxSize: 25 * 1024 * 1024,
+    maxSize: 20 * 1024 * 1024,
+    maxFiles: 500,
     noClick: true,
     noKeyboard: true,
   });

@@ -469,22 +469,55 @@ export const adminRecentOrders = createServerFn({ method: "GET" })
 
 export const adminReports = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator(
+    z
+      .object({ month: z.string().regex(/^\d{4}-\d{2}$/).optional() })
+      .optional()
+      .default({}),
+  )
+  .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: orders, error } = await supabaseAdmin
+    const { data: ordersAll, error } = await supabaseAdmin
       .from("orders")
       .select("id, status, total_price, shipping_fee, city, created_at");
     if (error) throw new Error(error.message);
 
-    const { data: items } = await supabaseAdmin
+    const { data: itemsAll } = await supabaseAdmin
       .from("order_items")
       .select("order_id, format_name, quantity, total_price");
 
-    const { data: expenses } = await supabaseAdmin
+    const { data: expensesAll } = await supabaseAdmin
       .from("expenses")
       .select("amount_km, category, occurred_at");
+
+    // Available months list (for filter UI)
+    const monthSet = new Set<string>();
+    for (const o of ordersAll!) {
+      const d = new Date(o.created_at as any);
+      monthSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    }
+    const availableMonths = [...monthSet].sort().reverse();
+
+    // Apply month filter
+    let orders = ordersAll!;
+    let items = itemsAll ?? [];
+    let expenses = expensesAll ?? [];
+    if (data?.month) {
+      const [yy, mm] = data.month.split("-").map(Number);
+      const start = new Date(yy, mm - 1, 1).getTime();
+      const end = new Date(yy, mm, 1).getTime();
+      const inMonth = (d: any) => {
+        const t = new Date(d).getTime();
+        return t >= start && t < end;
+      };
+      orders = orders.filter((o) => inMonth(o.created_at));
+      const orderIds = new Set(orders.map((o) => o.id));
+      items = items.filter((it) => orderIds.has(it.order_id as any));
+      expenses = expenses.filter((e) => inMonth(e.occurred_at));
+    }
+
 
     const net = (r: any) => Number(r.total_price) - Number(r.shipping_fee ?? 0);
     const completed = orders!.filter((o) => o.status === "completed");

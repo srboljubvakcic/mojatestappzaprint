@@ -73,6 +73,31 @@ function OrderDetail() {
     },
   });
 
+  const updateMut = useMutation({
+    mutationFn: () => updateFn({ data: { id, ...form } }),
+    onSuccess: () => {
+      toast.success("Podaci ažurirani");
+      setEditing(false);
+      qc.invalidateQueries({ queryKey: ["admin", "order", id] });
+      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  useEffect(() => {
+    if (data?.order && !editing) {
+      setForm({
+        full_name: data.order.full_name ?? "",
+        phone: data.order.phone ?? "",
+        email: data.order.email ?? "",
+        address: data.order.address ?? "",
+        city: data.order.city ?? "",
+        postal_code: data.order.postal_code ?? "",
+        notes: data.order.notes ?? "",
+      });
+    }
+  }, [data?.order, editing]);
+
   if (isLoading) {
     return <div className="p-10 text-sm text-muted-foreground">Učitavanje...</div>;
   }

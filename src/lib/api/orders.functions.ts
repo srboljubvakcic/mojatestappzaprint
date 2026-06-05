@@ -351,7 +351,7 @@ export const adminDashboardStats = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("orders")
-      .select("status, total_price, shipping_fee");
+      .select("status, total_price, shipping_fee, created_at");
     if (error) throw new Error(error.message);
     const { data: exp } = await supabaseAdmin.from("expenses").select("amount_km");
     const net = (r: any) => Number(r.total_price) - Number(r.shipping_fee ?? 0);
@@ -362,6 +362,47 @@ export const adminDashboardStats = createServerFn({ method: "GET" })
     const revenue = completedRows.reduce((s, r) => s + net(r), 0);
     const pendingRevenue = pendingRows.reduce((s, r) => s + net(r), 0);
     const expensesTotal = (exp ?? []).reduce((s, r: any) => s + Number(r.amount_km), 0);
+
+    // Daily (last 30 days)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daily: { date: string; orders: number; revenue: number }[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      daily.push({ date: d.toISOString().slice(0, 10), orders: 0, revenue: 0 });
+    }
+    const dailyMap = new Map(daily.map((d) => [d.date, d]));
+    for (const r of rows!) {
+      const key = new Date(r.created_at as any).toISOString().slice(0, 10);
+      const bucket = dailyMap.get(key);
+      if (!bucket) continue;
+      bucket.orders += 1;
+      if (r.status === "completed") bucket.revenue += net(r);
+    }
+
+    // Monthly (last 12 months)
+    const monthly: { month: string; orders: number; revenue: number }[] = [];
+    const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(firstOfMonth);
+      d.setMonth(firstOfMonth.getMonth() - i);
+      monthly.push({
+        month: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+        orders: 0,
+        revenue: 0,
+      });
+    }
+    const monthlyMap = new Map(monthly.map((m) => [m.month, m]));
+    for (const r of rows!) {
+      const d = new Date(r.created_at as any);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const bucket = monthlyMap.get(key);
+      if (!bucket) continue;
+      bucket.orders += 1;
+      if (r.status === "completed") bucket.revenue += net(r);
+    }
+
     const stats = {
       total: rows!.length,
       pending: rows!.filter((r) => r.status === "pending").length,
@@ -372,6 +413,9 @@ export const adminDashboardStats = createServerFn({ method: "GET" })
       pendingRevenue,
       expenses: expensesTotal,
       profit: revenue - expensesTotal,
+      daily,
+      monthly,
     };
     return { stats };
   });
+

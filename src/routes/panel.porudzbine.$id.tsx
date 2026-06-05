@@ -36,6 +36,17 @@ function OrderDetail() {
   const getFn = useServerFn(adminGetOrder);
   const statusFn = useServerFn(adminUpdateOrderStatus);
   const deleteImgFn = useServerFn(adminDeleteImage);
+  const updateFn = useServerFn(adminUpdateOrder);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({
+    full_name: "",
+    phone: "",
+    email: "",
+    address: "",
+    city: "",
+    postal_code: "",
+    notes: "",
+  });
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin", "order", id],

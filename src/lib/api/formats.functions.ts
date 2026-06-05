@@ -140,6 +140,10 @@ export const adminUpdateSettings = createServerFn({ method: "POST" })
       shipping_fee: z.number().min(0).max(1000),
       same_day_enabled: z.boolean(),
       same_day_price: z.number().min(0).max(1000),
+      gift_packaging_enabled: z.boolean(),
+      gift_packaging_price: z.number().min(0).max(1000),
+      gift_message_enabled: z.boolean(),
+      gift_message_price: z.number().min(0).max(1000),
     }),
   )
   .handler(async ({ data, context }) => {

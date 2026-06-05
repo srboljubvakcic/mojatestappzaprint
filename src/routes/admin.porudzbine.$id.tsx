@@ -291,6 +291,24 @@ function OrderDetail() {
                   <dd className="tabular-nums">{formatKM(Number(order.same_day_fee))}</dd>
                 </div>
               )}
+              {Number(order.gift_packaging_fee) > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>Poklon pakovanje</dt>
+                  <dd className="tabular-nums">{formatKM(Number(order.gift_packaging_fee))}</dd>
+                </div>
+              )}
+              {Number(order.gift_message_fee) > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>Poklon poruka</dt>
+                  <dd className="tabular-nums">{formatKM(Number(order.gift_message_fee))}</dd>
+                </div>
+              )}
+              {order.gift_message && (
+                <div className="mt-2 rounded-xl border border-primary/20 bg-primary/5 p-3">
+                  <div className="text-xs font-semibold text-primary">Poklon poruka</div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{order.gift_message}</p>
+                </div>
+              )}
               <div className="flex items-baseline justify-between pt-2">
                 <dt className="text-base font-medium">Ukupno</dt>
                 <dd className="text-lg font-semibold tabular-nums">

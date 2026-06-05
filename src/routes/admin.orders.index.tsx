@@ -41,7 +41,7 @@ function OrdersList() {
                 active
                   ? s === "all"
                     ? "bg-foreground text-background shadow-[var(--shadow-soft)]"
-                    : `${STATUS_STYLES[s]} shadow-[var(--shadow-soft)] ring-2 ring-offset-2 ring-offset-background ring-current/30`
+                    : `${STATUS_STYLES[s]} shadow-[var(--shadow-soft)] ring-2 ring-primary/30`
                   : "bg-card text-muted-foreground hover:bg-accent border border-border"
               }`}
             >

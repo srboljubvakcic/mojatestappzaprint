@@ -466,3 +466,24 @@ function Field({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function EditField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1 h-9 rounded-xl text-sm"
+      />
+    </div>
+  );
+}

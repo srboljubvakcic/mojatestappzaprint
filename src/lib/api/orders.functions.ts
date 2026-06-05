@@ -323,6 +323,39 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminUpdateOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({
+      id: z.string().uuid(),
+      full_name: z.string().trim().min(2).max(120),
+      phone: z.string().trim().min(5).max(40),
+      email: z.string().trim().email().max(200).optional().or(z.literal("")),
+      address: z.string().trim().min(3).max(300),
+      city: z.string().trim().min(2).max(100),
+      postal_code: z.string().trim().max(20).optional().or(z.literal("")),
+      notes: z.string().trim().max(1000).optional().or(z.literal("")),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("orders")
+      .update({
+        full_name: data.full_name,
+        phone: data.phone,
+        email: data.email || null,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postal_code || null,
+        notes: data.notes || null,
+      })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const adminDeleteImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))

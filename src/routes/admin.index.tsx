@@ -41,11 +41,16 @@ function Dashboard() {
         <h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
           Pregled poslovanja
         </h1>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Kpi
-            label="Prihod"
+            label="Prihod (završeno)"
             value={s ? formatKM(s.revenue) : "—"}
             icon={<Wallet className="h-4 w-4" />}
+          />
+          <Kpi
+            label="Na čekanju (potencijal)"
+            value={s ? formatKM((s as any).pendingRevenue ?? 0) : "—"}
+            icon={<Clock className="h-4 w-4" />}
           />
           <Kpi
             label="Troškovi"
@@ -53,12 +58,15 @@ function Dashboard() {
             icon={<TrendingDown className="h-4 w-4" />}
           />
           <Kpi
-            label="Dobit"
+            label="Dobit (potvrđena)"
             value={s ? formatKM(s.profit) : "—"}
             icon={<TrendingUp className="h-4 w-4" />}
             highlight
           />
         </div>
+        <p className="mt-4 text-[11px] opacity-70">
+          Prihod i dobit ne uključuju troškove dostave i računaju se tek kada je narudžba u statusu "Završeno".
+        </p>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

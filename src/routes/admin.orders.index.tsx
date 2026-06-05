@@ -6,14 +6,7 @@ import { ChevronRight, Zap } from "lucide-react";
 
 import { adminListOrders } from "@/lib/api/orders.functions";
 import { formatKM, formatOrderNo } from "@/lib/format";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { STATUS_LABEL, STATUS_STYLES } from "@/components/order-status";
+import { STATUS_LABEL, STATUS_ORDER, STATUS_STYLES } from "@/components/order-status";
 
 export const Route = createFileRoute("/admin/orders/")({
   component: OrdersList,
@@ -29,27 +22,33 @@ function OrdersList() {
 
   return (
     <div className="p-6 sm:p-10">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Narudžbe</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Pregled i upravljanje svim narudžbama.
-          </p>
-        </div>
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-48 rounded-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Svi statusi</SelectItem>
-            <SelectItem value="pending">Na čekanju</SelectItem>
-            <SelectItem value="in_progress">U obradi</SelectItem>
-            <SelectItem value="printed">Štampano</SelectItem>
-            <SelectItem value="shipped">Poslato</SelectItem>
-            <SelectItem value="completed">Završeno</SelectItem>
-            <SelectItem value="cancelled">Otkazano</SelectItem>
-          </SelectContent>
-        </Select>
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Narudžbe</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Pregled i upravljanje svim narudžbama.
+        </p>
+      </div>
+
+      <div className="mt-6 flex flex-wrap gap-2">
+        {(["all", ...STATUS_ORDER] as const).map((s) => {
+          const active = status === s;
+          const label = s === "all" ? "Sve" : STATUS_LABEL[s];
+          return (
+            <button
+              key={s}
+              onClick={() => setStatus(s)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
+                active
+                  ? s === "all"
+                    ? "bg-foreground text-background shadow-[var(--shadow-soft)]"
+                    : `${STATUS_STYLES[s]} shadow-[var(--shadow-soft)] ring-2 ring-offset-2 ring-offset-background ring-current/30`
+                  : "bg-card text-muted-foreground hover:bg-accent border border-border"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-soft)]">

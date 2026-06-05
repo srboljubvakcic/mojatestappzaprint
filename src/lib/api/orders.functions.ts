@@ -609,6 +609,8 @@ export const adminReports = createServerFn({ method: "GET" })
         topFormats,
         expenseByCategory,
         statusDist,
+        availableMonths,
+        month: data?.month ?? null,
       },
     };
   });

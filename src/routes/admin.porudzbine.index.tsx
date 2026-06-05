@@ -8,7 +8,7 @@ import { adminListOrders } from "@/lib/api/orders.functions";
 import { formatKM, formatOrderNo } from "@/lib/format";
 import { STATUS_LABEL, STATUS_ORDER, STATUS_STYLES } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/orders/")({
+export const Route = createFileRoute("/admin/porudzbine/")({
   component: OrdersList,
 });
 

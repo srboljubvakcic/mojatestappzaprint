@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export const Route = createFileRoute("/admin/formats")({
+export const Route = createFileRoute("/admin/formati")({
   component: FormatsPage,
 });
 

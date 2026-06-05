@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { STATUS_LABEL, STATUS_ORDER, STATUS_STYLES } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/orders/$id")({
+export const Route = createFileRoute("/admin/porudzbine/$id")({
   component: OrderDetail,
 });
 

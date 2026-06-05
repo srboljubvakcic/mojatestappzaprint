@@ -335,20 +335,25 @@ export const adminDashboardStats = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("orders")
-      .select("status, total_price");
+      .select("status, total_price, shipping_fee");
     if (error) throw new Error(error.message);
     const { data: exp } = await supabaseAdmin.from("expenses").select("amount_km");
-    const revenue = rows!
-      .filter((r) => r.status !== "cancelled")
-      .reduce((s, r) => s + Number(r.total_price), 0);
+    const net = (r: any) => Number(r.total_price) - Number(r.shipping_fee ?? 0);
+    const completedRows = rows!.filter((r) => r.status === "completed");
+    const pendingRows = rows!.filter(
+      (r) => r.status !== "cancelled" && r.status !== "completed",
+    );
+    const revenue = completedRows.reduce((s, r) => s + net(r), 0);
+    const pendingRevenue = pendingRows.reduce((s, r) => s + net(r), 0);
     const expensesTotal = (exp ?? []).reduce((s, r: any) => s + Number(r.amount_km), 0);
     const stats = {
       total: rows!.length,
       pending: rows!.filter((r) => r.status === "pending").length,
       inProgress: rows!.filter((r) => r.status === "in_progress").length,
       shipped: rows!.filter((r) => r.status === "shipped").length,
-      completed: rows!.filter((r) => r.status === "completed").length,
+      completed: completedRows.length,
       revenue,
+      pendingRevenue,
       expenses: expensesTotal,
       profit: revenue - expensesTotal,
     };

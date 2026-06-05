@@ -239,7 +239,7 @@ function HomePage() {
         description: "Kontaktiraćemo vas uskoro za potvrdu.",
       });
       navigate({
-        to: "/order/$id",
+        to: "/porudzbina/$id",
         params: { id: orderId },
         search: { total: totals.total },
       });

@@ -63,7 +63,7 @@ function OrderDetail() {
   if (error || !data) {
     return (
       <div className="p-10">
-        <Link to="/admin/orders" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/admin/porudzbine" className="text-sm text-muted-foreground hover:text-foreground">
           ← Sve narudžbe
         </Link>
         <div className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
@@ -106,7 +106,7 @@ function OrderDetail() {
   return (
     <div className="p-6 sm:p-10">
       <Link
-        to="/admin/orders"
+        to="/admin/porudzbine"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> Sve narudžbe

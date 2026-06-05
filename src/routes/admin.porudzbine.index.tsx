@@ -65,7 +65,7 @@ function OrdersList() {
             {data.orders.map((o: any) => (
               <li key={o.id}>
                 <Link
-                  to="/admin/orders/$id"
+                  to="/admin/porudzbine/$id"
                   params={{ id: o.id }}
                   className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-accent/40"
                 >

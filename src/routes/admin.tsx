@@ -24,7 +24,7 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
+    if (!data.user) throw redirect({ to: "/prijava" });
   },
   component: AdminLayout,
 });
@@ -41,7 +41,7 @@ function AdminLayout() {
   const logout = async () => {
     await supabase.auth.signOut();
     qc.clear();
-    router.navigate({ to: "/auth" });
+    router.navigate({ to: "/prijava" });
   };
 
   if (adminQ.isLoading) {
@@ -86,16 +86,16 @@ function AdminLayout() {
           <NavItem to="/admin" icon={<LayoutDashboard className="h-4 w-4" />}>
             Pregled
           </NavItem>
-          <NavItem to="/admin/orders" icon={<Package className="h-4 w-4" />}>
+          <NavItem to="/admin/porudzbine" icon={<Package className="h-4 w-4" />}>
             Narudžbe
           </NavItem>
-          <NavItem to="/admin/formats" icon={<Settings className="h-4 w-4" />}>
+          <NavItem to="/admin/formati" icon={<Settings className="h-4 w-4" />}>
             Proizvodi
           </NavItem>
-          <NavItem to="/admin/expenses" icon={<Receipt className="h-4 w-4" />}>
+          <NavItem to="/admin/troskovi" icon={<Receipt className="h-4 w-4" />}>
             Troškovi
           </NavItem>
-          <NavItem to="/admin/settings" icon={<Sliders className="h-4 w-4" />}>
+          <NavItem to="/admin/postavke" icon={<Sliders className="h-4 w-4" />}>
             Postavke
           </NavItem>
         </nav>

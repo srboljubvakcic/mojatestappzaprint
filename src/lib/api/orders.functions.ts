@@ -25,11 +25,11 @@ export const createSignedUploads = createServerFn({ method: "POST" })
         .array(
           z.object({
             name: z.string().min(1).max(200),
-            size: z.number().int().min(1).max(25 * 1024 * 1024),
+            size: z.number().int().min(1).max(20 * 1024 * 1024),
           }),
         )
         .min(1)
-        .max(50),
+        .max(500),
     }),
   )
   .handler(async ({ data }) => {

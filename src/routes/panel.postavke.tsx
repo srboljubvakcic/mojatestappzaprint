@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-export const Route = createFileRoute("/admin/postavke")({
+export const Route = createFileRoute("/panel/postavke")({
   component: SettingsPage,
 });
 
@@ -121,10 +121,10 @@ function SettingsPage() {
           </div>
         </Card>
 
-        <Card icon={<Zap className="h-4 w-4" />} title="Same day print">
+        <Card icon={<Zap className="h-4 w-4" />} title="Štampa istog dana">
           <div className="flex items-center justify-between rounded-xl bg-secondary px-4 py-3">
             <div>
-              <Label className="cursor-pointer">Omogući same day print</Label>
+              <Label className="cursor-pointer">Omogući štampa istog dana</Label>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Korisnici mogu izabrati hitnu štampu za dodatnu naknadu
               </p>
@@ -135,7 +135,7 @@ function SettingsPage() {
             />
           </div>
           <div>
-            <Label>Cijena same day (KM)</Label>
+            <Label>Cijena štampe istog dana (KM)</Label>
             <Input
               type="number"
               min="0"

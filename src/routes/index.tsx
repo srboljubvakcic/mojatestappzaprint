@@ -158,7 +158,8 @@ function HomePage() {
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: { "image/*": [] },
-    maxSize: 25 * 1024 * 1024,
+    maxSize: 20 * 1024 * 1024,
+    maxFiles: 500,
     noClick: true,
     noKeyboard: true,
   });
@@ -271,41 +272,92 @@ function HomePage() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
-      {/* Hero */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 pb-8 sm:px-6 sm:pt-20">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
-            <Sparkles className="h-3 w-3" /> Profesionalni kvalitet · Dostava u BiH
-          </span>
-          <h1 className="mt-5 text-4xl font-semibold tracking-tight sm:text-6xl">
-            Štampajte fotografije
-            <br />
-            <span className="text-muted-foreground">jednostavno i brzo.</span>
-          </h1>
-          <p className="mt-5 text-base text-muted-foreground sm:text-lg">
-            Otpremite slike, izaberite format i broj kopija. Mi ih štampamo i
-            dostavljamo na vašu adresu.
-          </p>
-        </div>
+      {/* Hero — premium elegant */}
+      <section className="relative overflow-hidden">
+        {/* decorative background */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 50% 0%, oklch(0.95 0.05 258 / 0.55) 0%, transparent 70%), radial-gradient(40% 35% at 85% 10%, oklch(0.93 0.08 320 / 0.35) 0%, transparent 70%), radial-gradient(35% 30% at 15% 20%, oklch(0.94 0.06 200 / 0.4) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-border to-transparent"
+        />
 
-        <div className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground sm:text-sm">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5">
-            <ShieldCheck className="h-3.5 w-3.5" /> Sigurno otpremanje
-          </span>
-          {settings?.free_shipping_enabled && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-success">
-              <Truck className="h-3.5 w-3.5" /> Besplatna dostava preko{" "}
-              {formatKM(Number(settings.free_shipping_threshold))}
+        <div className="mx-auto max-w-6xl px-4 pt-16 pb-12 sm:px-6 sm:pt-28 sm:pb-16">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/70 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground shadow-[var(--shadow-soft)] backdrop-blur">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+              </span>
+              Studio kvalitet · Dostava u BiH
             </span>
-          )}
-          {settings?.same_day_enabled && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1.5 text-warning-foreground">
-              <Zap className="h-3.5 w-3.5" /> Same day print dostupan
-            </span>
-          )}
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5">
-            Plaćanje pouzećem
-          </span>
+
+            <h1 className="mt-7 text-[2.5rem] font-semibold leading-[1.05] tracking-tight sm:text-[4.5rem]">
+              Vaše uspomene
+              <br />
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(120deg, oklch(0.58 0.18 258) 0%, oklch(0.55 0.2 295) 50%, oklch(0.6 0.18 340) 100%)",
+                }}
+              >
+                štampane savršeno.
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-lg">
+              Profesionalna foto štampa na premium papiru. Otpremite slike,
+              izaberite format, mi dostavljamo na vašu adresu.
+            </p>
+
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-2.5">
+              <Button
+                size="lg"
+                onClick={open}
+                className="rounded-full px-6 shadow-[var(--shadow-soft)]"
+              >
+                <ImagePlus className="mr-2 h-4 w-4" />
+                Otpremi fotografije
+              </Button>
+              <a
+                href="#proizvodi"
+                className="rounded-full border border-border/80 bg-card/70 px-5 py-2.5 text-sm font-medium text-foreground/80 backdrop-blur transition-colors hover:bg-card"
+              >
+                Pogledaj formate →
+              </a>
+            </div>
+          </div>
+
+          {/* Trust strip */}
+          <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-4">
+            <TrustChip icon={<ShieldCheck className="h-4 w-4" />} title="Sigurno" subtitle="Šifrovan upload" />
+            <TrustChip
+              icon={<Truck className="h-4 w-4" />}
+              title={
+                settings?.free_shipping_enabled
+                  ? `Besplatno > ${formatKM(Number(settings.free_shipping_threshold))}`
+                  : "Brza dostava"
+              }
+              subtitle="Cijela BiH"
+            />
+            {settings?.same_day_enabled ? (
+              <TrustChip
+                icon={<Zap className="h-4 w-4" />}
+                title="Istog dana"
+                subtitle="Hitna štampa"
+              />
+            ) : (
+              <TrustChip icon={<Sparkles className="h-4 w-4" />} title="Premium" subtitle="Mat & sjajni papir" />
+            )}
+            <TrustChip icon={<Gift className="h-4 w-4" />} title="Pouzeće" subtitle="Plati pri dostavi" />
+          </div>
         </div>
       </section>
 
@@ -327,7 +379,7 @@ function HomePage() {
             Prevucite fotografije ovdje
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            ili kliknite dugme ispod · JPG, PNG, HEIC do 25MB
+            ili kliknite dugme ispod · JPG, PNG, HEIC do 20MB · do 500 fotografija odjednom
           </p>
           <Button type="button" onClick={open} size="lg" className="mt-6 rounded-full px-6">
             <ImagePlus className="mr-2 h-4 w-4" />
@@ -405,7 +457,7 @@ function HomePage() {
 
       {/* Extras: Albums & Gifts */}
       {(albums.length > 0 || gifts.length > 0) && (
-        <section className="mx-auto mt-12 max-w-6xl px-4 sm:px-6">
+        <section id="proizvodi" className="mx-auto mt-12 max-w-6xl px-4 sm:px-6">
           <h3 className="text-lg font-semibold">Dodatni proizvodi</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Dodajte foto album ili poklon paket uz vašu narudžbu.
@@ -568,7 +620,7 @@ function HomePage() {
                   </span>
                   <div>
                     <Label className="cursor-pointer text-sm font-semibold">
-                      Same day print
+                      Štampa istog dana
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Hitna štampa istog dana · +
@@ -653,7 +705,7 @@ function HomePage() {
                   muted
                 />
                 {totals.sameDayFee > 0 && (
-                  <Row label="Same day print" value={formatKM(totals.sameDayFee)} muted />
+                  <Row label="Štampa istog dana" value={formatKM(totals.sameDayFee)} muted />
                 )}
                 {totals.giftPackFee > 0 && (
                   <Row label="Poklon pakovanje" value={formatKM(totals.giftPackFee)} muted />
@@ -733,6 +785,28 @@ function QtyInput({
       >
         <Plus className="h-3.5 w-3.5" />
       </button>
+    </div>
+  );
+}
+
+function TrustChip({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 py-3 text-left shadow-[var(--shadow-soft)] backdrop-blur">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/8 text-primary">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <div className="truncate text-sm font-semibold tracking-tight">{title}</div>
+        <div className="truncate text-[11px] text-muted-foreground">{subtitle}</div>
+      </div>
     </div>
   );
 }

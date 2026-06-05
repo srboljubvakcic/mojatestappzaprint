@@ -33,7 +33,7 @@ import {
 import { formatKM, formatOrderNo } from "@/lib/format";
 import { STATUS_LABEL, STATUS_STYLES } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/")({
+export const Route = createFileRoute("/panel/")({
   component: Dashboard,
 });
 
@@ -172,7 +172,7 @@ function Dashboard() {
               <p className="mt-0.5 text-xs text-muted-foreground">8 najnovijih</p>
             </div>
             <Link
-              to="/admin/porudzbine"
+              to="/panel/porudzbine"
               className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               Sve <ChevronRight className="h-3 w-3" />
@@ -182,7 +182,7 @@ function Dashboard() {
             {(recent?.orders ?? []).map((o: any) => (
               <li key={o.id}>
                 <Link
-                  to="/admin/porudzbine/$id"
+                  to="/panel/porudzbine/$id"
                   params={{ id: o.id }}
                   className="flex items-center gap-3 py-2.5 transition-colors hover:bg-accent/40 -mx-2 px-2 rounded-lg"
                 >
@@ -219,7 +219,7 @@ function Dashboard() {
               <p className="mt-0.5 text-xs text-muted-foreground">Po broju kopija</p>
             </div>
             <Link
-              to="/admin/izvjestaji"
+              to="/panel/izvjestaji"
               className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               <BarChart3 className="h-3 w-3" /> Izvještaji

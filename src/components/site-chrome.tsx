@@ -16,17 +16,11 @@ export function SiteHeader() {
             href="https://wa.me/38760000000"
             target="_blank"
             rel="noreferrer"
-            className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-muted-foreground transition-colors hover:bg-accent sm:inline-flex"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-muted-foreground transition-colors hover:bg-accent"
           >
             <MessageCircle className="h-3.5 w-3.5" />
             Podrška
           </a>
-          <Link
-            to="/prijava"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Admin
-          </Link>
         </nav>
       </div>
     </header>

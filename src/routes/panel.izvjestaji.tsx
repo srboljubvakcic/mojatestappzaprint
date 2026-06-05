@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import {
   Pie,
   PieChart,
@@ -24,7 +25,7 @@ import { adminReports } from "@/lib/api/orders.functions";
 import { formatKM } from "@/lib/format";
 import { STATUS_LABEL } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/izvjestaji")({
+export const Route = createFileRoute("/panel/izvjestaji")({
   component: ReportsPage,
 });
 
@@ -50,9 +51,10 @@ const EXP_LABEL: Record<string, string> = {
 
 function ReportsPage() {
   const fn = useServerFn(adminReports);
+  const [month, setMonth] = useState<string>("all");
   const { data, isLoading } = useQuery({
-    queryKey: ["admin", "reports"],
-    queryFn: () => fn(),
+    queryKey: ["admin", "reports", month],
+    queryFn: () => fn({ data: month === "all" ? {} : { month } }),
   });
   const r = data?.report as any;
 
@@ -70,14 +72,51 @@ function ReportsPage() {
       }))
     : [];
 
+  const formatMonth = (m: string) => {
+    const [y, mm] = m.split("-").map(Number);
+    return new Date(y, mm - 1, 1).toLocaleDateString("bs-BA", {
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="p-6 sm:p-10">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Izvještaji</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Detaljan pregled poslovanja, trendovi i ključni pokazatelji.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Izvještaji</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Detaljan pregled poslovanja, trendovi i ključni pokazatelji.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground">Period:</span>
+          <button
+            onClick={() => setMonth("all")}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
+              month === "all"
+                ? "bg-foreground text-background"
+                : "border border-border bg-card text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            Sve
+          </button>
+          {(r?.availableMonths ?? []).slice(0, 12).map((m: string) => (
+            <button
+              key={m}
+              onClick={() => setMonth(m)}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition ${
+                month === m
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-card text-muted-foreground hover:bg-accent"
+              }`}
+            >
+              {formatMonth(m)}
+            </button>
+          ))}
+        </div>
       </div>
+
 
       {isLoading || !r ? (
         <div className="mt-10 grid h-64 place-items-center text-sm text-muted-foreground">

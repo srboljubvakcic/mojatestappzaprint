@@ -25,11 +25,11 @@ export const createSignedUploads = createServerFn({ method: "POST" })
         .array(
           z.object({
             name: z.string().min(1).max(200),
-            size: z.number().int().min(1).max(25 * 1024 * 1024),
+            size: z.number().int().min(1).max(20 * 1024 * 1024),
           }),
         )
         .min(1)
-        .max(50),
+        .max(500),
     }),
   )
   .handler(async ({ data }) => {
@@ -323,6 +323,39 @@ export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const adminUpdateOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({
+      id: z.string().uuid(),
+      full_name: z.string().trim().min(2).max(120),
+      phone: z.string().trim().min(5).max(40),
+      email: z.string().trim().email().max(200).optional().or(z.literal("")),
+      address: z.string().trim().min(3).max(300),
+      city: z.string().trim().min(2).max(100),
+      postal_code: z.string().trim().max(20).optional().or(z.literal("")),
+      notes: z.string().trim().max(1000).optional().or(z.literal("")),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("orders")
+      .update({
+        full_name: data.full_name,
+        phone: data.phone,
+        email: data.email || null,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postal_code || null,
+        notes: data.notes || null,
+      })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const adminDeleteImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
@@ -436,26 +469,59 @@ export const adminRecentOrders = createServerFn({ method: "GET" })
 
 export const adminReports = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator(
+    z
+      .object({ month: z.string().regex(/^\d{4}-\d{2}$/).optional() })
+      .optional()
+      .default({}),
+  )
+  .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: orders, error } = await supabaseAdmin
+    const { data: ordersAll, error } = await supabaseAdmin
       .from("orders")
       .select("id, status, total_price, shipping_fee, city, created_at");
     if (error) throw new Error(error.message);
 
-    const { data: items } = await supabaseAdmin
+    const { data: itemsAll } = await supabaseAdmin
       .from("order_items")
       .select("order_id, format_name, quantity, total_price");
 
-    const { data: expenses } = await supabaseAdmin
+    const { data: expensesAll } = await supabaseAdmin
       .from("expenses")
       .select("amount_km, category, occurred_at");
 
+    // Available months list (for filter UI)
+    const monthSet = new Set<string>();
+    for (const o of ordersAll!) {
+      const d = new Date(o.created_at as any);
+      monthSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    }
+    const availableMonths = [...monthSet].sort().reverse();
+
+    // Apply month filter
+    let orders = ordersAll!;
+    let items = itemsAll ?? [];
+    let expenses = expensesAll ?? [];
+    if (data?.month) {
+      const [yy, mm] = data.month.split("-").map(Number);
+      const start = new Date(yy, mm - 1, 1).getTime();
+      const end = new Date(yy, mm, 1).getTime();
+      const inMonth = (d: any) => {
+        const t = new Date(d).getTime();
+        return t >= start && t < end;
+      };
+      orders = orders.filter((o) => inMonth(o.created_at));
+      const orderIds = new Set(orders.map((o) => o.id));
+      items = items.filter((it) => orderIds.has(it.order_id as any));
+      expenses = expenses.filter((e) => inMonth(e.occurred_at));
+    }
+
+
     const net = (r: any) => Number(r.total_price) - Number(r.shipping_fee ?? 0);
-    const completed = orders!.filter((o) => o.status === "completed");
-    const cancelled = orders!.filter((o) => o.status === "cancelled");
+    const completed = orders.filter((o) => o.status === "completed");
+    const cancelled = orders.filter((o) => o.status === "cancelled");
 
     // This month vs last month
     const now = new Date();
@@ -466,10 +532,10 @@ export const adminReports = createServerFn({ method: "GET" })
       const t = new Date(d).getTime();
       return t >= a.getTime() && t < b.getTime();
     };
-    const thisMonthOrders = orders!.filter((o) =>
+    const thisMonthOrders = orders.filter((o) =>
       inRange(o.created_at, startThis, new Date(now.getFullYear(), now.getMonth() + 1, 1)),
     );
-    const lastMonthOrders = orders!.filter((o) => inRange(o.created_at, startLast, endLast));
+    const lastMonthOrders = orders.filter((o) => inRange(o.created_at, startLast, endLast));
     const thisMonthRevenue = thisMonthOrders
       .filter((o) => o.status === "completed")
       .reduce((s, r) => s + net(r), 0);
@@ -479,7 +545,7 @@ export const adminReports = createServerFn({ method: "GET" })
 
     // Top cities
     const cityMap = new Map<string, { city: string; orders: number; revenue: number }>();
-    for (const o of orders!) {
+    for (const o of orders) {
       const k = (o.city || "—").trim();
       const e = cityMap.get(k) ?? { city: k, orders: 0, revenue: 0 };
       e.orders += 1;
@@ -492,7 +558,7 @@ export const adminReports = createServerFn({ method: "GET" })
 
     // Top formats by quantity & revenue
     const fmtMap = new Map<string, { name: string; quantity: number; revenue: number }>();
-    for (const it of items ?? []) {
+    for (const it of items) {
       const k = it.format_name as string;
       const e = fmtMap.get(k) ?? { name: k, quantity: 0, revenue: 0 };
       e.quantity += Number(it.quantity);
@@ -505,7 +571,7 @@ export const adminReports = createServerFn({ method: "GET" })
 
     // Expense breakdown by category
     const expMap = new Map<string, number>();
-    for (const e of expenses ?? []) {
+    for (const e of expenses) {
       expMap.set(e.category, (expMap.get(e.category) ?? 0) + Number(e.amount_km));
     }
     const expenseByCategory = [...expMap.entries()]
@@ -514,22 +580,22 @@ export const adminReports = createServerFn({ method: "GET" })
 
     // Status distribution
     const statusDist: Record<string, number> = {};
-    for (const o of orders!) statusDist[o.status] = (statusDist[o.status] ?? 0) + 1;
+    for (const o of orders) statusDist[o.status] = (statusDist[o.status] ?? 0) + 1;
 
     const totalRevenue = completed.reduce((s, r) => s + net(r), 0);
-    const totalExpenses = (expenses ?? []).reduce((s, r: any) => s + Number(r.amount_km), 0);
+    const totalExpenses = (expenses).reduce((s, r: any) => s + Number(r.amount_km), 0);
 
     return {
       report: {
         totals: {
-          orders: orders!.length,
+          orders: orders.length,
           completed: completed.length,
           cancelled: cancelled.length,
           revenue: totalRevenue,
           expenses: totalExpenses,
           profit: totalRevenue - totalExpenses,
           avgOrderValue: completed.length ? totalRevenue / completed.length : 0,
-          completionRate: orders!.length ? (completed.length / orders!.length) * 100 : 0,
+          completionRate: orders.length ? (completed.length / orders.length) * 100 : 0,
         },
         thisMonth: {
           orders: thisMonthOrders.length,
@@ -543,6 +609,8 @@ export const adminReports = createServerFn({ method: "GET" })
         topFormats,
         expenseByCategory,
         statusDist,
+        availableMonths,
+        month: data?.month ?? null,
       },
     };
   });

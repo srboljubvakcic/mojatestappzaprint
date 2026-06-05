@@ -1,16 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Download, Trash2, FileImage, Zap } from "lucide-react";
+import { ArrowLeft, Download, Trash2, FileImage, Zap, Pencil, Save, X } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
 import JSZip from "jszip";
 
 import {
   adminGetOrder,
   adminUpdateOrderStatus,
   adminDeleteImage,
+  adminUpdateOrder,
 } from "@/lib/api/orders.functions";
 import { formatKM, formatOrderNo } from "@/lib/format";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,7 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { STATUS_LABEL, STATUS_ORDER, STATUS_STYLES } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/porudzbine/$id")({
+export const Route = createFileRoute("/panel/porudzbine/$id")({
   component: OrderDetail,
 });
 
@@ -31,6 +36,17 @@ function OrderDetail() {
   const getFn = useServerFn(adminGetOrder);
   const statusFn = useServerFn(adminUpdateOrderStatus);
   const deleteImgFn = useServerFn(adminDeleteImage);
+  const updateFn = useServerFn(adminUpdateOrder);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({
+    full_name: "",
+    phone: "",
+    email: "",
+    address: "",
+    city: "",
+    postal_code: "",
+    notes: "",
+  });
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin", "order", id],
@@ -57,13 +73,38 @@ function OrderDetail() {
     },
   });
 
+  const updateMut = useMutation({
+    mutationFn: () => updateFn({ data: { id, ...form } }),
+    onSuccess: () => {
+      toast.success("Podaci ažurirani");
+      setEditing(false);
+      qc.invalidateQueries({ queryKey: ["admin", "order", id] });
+      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  useEffect(() => {
+    if (data?.order && !editing) {
+      setForm({
+        full_name: data.order.full_name ?? "",
+        phone: data.order.phone ?? "",
+        email: data.order.email ?? "",
+        address: data.order.address ?? "",
+        city: data.order.city ?? "",
+        postal_code: data.order.postal_code ?? "",
+        notes: data.order.notes ?? "",
+      });
+    }
+  }, [data?.order, editing]);
+
   if (isLoading) {
     return <div className="p-10 text-sm text-muted-foreground">Učitavanje...</div>;
   }
   if (error || !data) {
     return (
       <div className="p-10">
-        <Link to="/admin/porudzbine" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/panel/porudzbine" className="text-sm text-muted-foreground hover:text-foreground">
           ← Sve narudžbe
         </Link>
         <div className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
@@ -106,7 +147,7 @@ function OrderDetail() {
   return (
     <div className="p-6 sm:p-10">
       <Link
-        to="/admin/porudzbine"
+        to="/panel/porudzbine"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> Sve narudžbe
@@ -120,7 +161,7 @@ function OrderDetail() {
             </h1>
             {order.same_day && (
               <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning-foreground">
-                <Zap className="h-3 w-3" /> Same day
+                <Zap className="h-3 w-3" /> Istog dana
               </span>
             )}
           </div>
@@ -287,7 +328,7 @@ function OrderDetail() {
               </div>
               {Number(order.same_day_fee) > 0 && (
                 <div className="flex justify-between text-muted-foreground">
-                  <dt>Same day print</dt>
+                  <dt>Štampa istog dana</dt>
                   <dd className="tabular-nums">{formatKM(Number(order.same_day_fee))}</dd>
                 </div>
               )}
@@ -320,22 +361,74 @@ function OrderDetail() {
         </div>
 
         <aside className="space-y-4">
-          <Section title="Dostava">
-            <dl className="space-y-2 text-sm">
-              <Field label="Ime" value={order.full_name} />
-              <Field label="Telefon" value={order.phone} />
-              <Field label="Email" value={order.email || "—"} />
-              <Field label="Adresa" value={order.address} />
-              <Field label="Grad" value={order.city} />
-              <Field label="Pošt. broj" value={order.postal_code || "—"} />
-              {order.notes && <Field label="Napomena" value={order.notes} />}
-              {order.shipped_at && (
-                <Field
-                  label="Poslato"
-                  value={new Date(order.shipped_at).toLocaleString("bs-BA")}
-                />
-              )}
-            </dl>
+          <Section
+            title="Dostava"
+            actions={
+              editing ? (
+                <div className="flex gap-1.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={() => setEditing(false)}
+                  >
+                    <X className="mr-1 h-3 w-3" /> Otkaži
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="rounded-full"
+                    disabled={updateMut.isPending}
+                    onClick={() => updateMut.mutate()}
+                  >
+                    <Save className="mr-1 h-3 w-3" /> Sačuvaj
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full"
+                  onClick={() => setEditing(true)}
+                >
+                  <Pencil className="mr-1 h-3 w-3" /> Izmijeni
+                </Button>
+              )
+            }
+          >
+            {editing ? (
+              <div className="space-y-3 text-sm">
+                <EditField label="Ime" value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} />
+                <EditField label="Telefon" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+                <EditField label="Email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
+                <EditField label="Adresa" value={form.address} onChange={(v) => setForm({ ...form, address: v })} />
+                <EditField label="Grad" value={form.city} onChange={(v) => setForm({ ...form, city: v })} />
+                <EditField label="Pošt. broj" value={form.postal_code} onChange={(v) => setForm({ ...form, postal_code: v })} />
+                <div>
+                  <Label className="text-xs text-muted-foreground">Napomena</Label>
+                  <Textarea
+                    value={form.notes}
+                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                    className="mt-1 min-h-[70px] rounded-xl text-sm"
+                  />
+                </div>
+              </div>
+            ) : (
+              <dl className="space-y-2 text-sm">
+                <Field label="Ime" value={order.full_name} />
+                <Field label="Telefon" value={order.phone} />
+                <Field label="Email" value={order.email || "—"} />
+                <Field label="Adresa" value={order.address} />
+                <Field label="Grad" value={order.city} />
+                <Field label="Pošt. broj" value={order.postal_code || "—"} />
+                {order.notes && <Field label="Napomena" value={order.notes} />}
+                {order.shipped_at && (
+                  <Field
+                    label="Poslato"
+                    value={new Date(order.shipped_at).toLocaleString("bs-BA")}
+                  />
+                )}
+              </dl>
+            )}
           </Section>
         </aside>
       </div>
@@ -370,6 +463,27 @@ function Field({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between gap-3">
       <dt className="shrink-0 text-muted-foreground">{label}</dt>
       <dd className="text-right">{value}</dd>
+    </div>
+  );
+}
+
+function EditField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1 h-9 rounded-xl text-sm"
+      />
     </div>
   );
 }

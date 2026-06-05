@@ -94,9 +94,13 @@ function AdminLayout() {
           <NavItem to="/admin/formati" icon={<Settings className="h-4 w-4" />}>
             Proizvodi
           </NavItem>
+          <NavItem to="/admin/izvjestaji" icon={<BarChart3 className="h-4 w-4" />}>
+            Izvještaji
+          </NavItem>
           <NavItem to="/admin/troskovi" icon={<Receipt className="h-4 w-4" />}>
             Troškovi
           </NavItem>
+
           <NavItem to="/admin/postavke" icon={<Sliders className="h-4 w-4" />}>
             Postavke
           </NavItem>

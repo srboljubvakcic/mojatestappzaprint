@@ -520,8 +520,8 @@ export const adminReports = createServerFn({ method: "GET" })
 
 
     const net = (r: any) => Number(r.total_price) - Number(r.shipping_fee ?? 0);
-    const completed = orders!.filter((o) => o.status === "completed");
-    const cancelled = orders!.filter((o) => o.status === "cancelled");
+    const completed = orders.filter((o) => o.status === "completed");
+    const cancelled = orders.filter((o) => o.status === "cancelled");
 
     // This month vs last month
     const now = new Date();
@@ -532,10 +532,10 @@ export const adminReports = createServerFn({ method: "GET" })
       const t = new Date(d).getTime();
       return t >= a.getTime() && t < b.getTime();
     };
-    const thisMonthOrders = orders!.filter((o) =>
+    const thisMonthOrders = orders.filter((o) =>
       inRange(o.created_at, startThis, new Date(now.getFullYear(), now.getMonth() + 1, 1)),
     );
-    const lastMonthOrders = orders!.filter((o) => inRange(o.created_at, startLast, endLast));
+    const lastMonthOrders = orders.filter((o) => inRange(o.created_at, startLast, endLast));
     const thisMonthRevenue = thisMonthOrders
       .filter((o) => o.status === "completed")
       .reduce((s, r) => s + net(r), 0);
@@ -545,7 +545,7 @@ export const adminReports = createServerFn({ method: "GET" })
 
     // Top cities
     const cityMap = new Map<string, { city: string; orders: number; revenue: number }>();
-    for (const o of orders!) {
+    for (const o of orders) {
       const k = (o.city || "—").trim();
       const e = cityMap.get(k) ?? { city: k, orders: 0, revenue: 0 };
       e.orders += 1;
@@ -558,7 +558,7 @@ export const adminReports = createServerFn({ method: "GET" })
 
     // Top formats by quantity & revenue
     const fmtMap = new Map<string, { name: string; quantity: number; revenue: number }>();
-    for (const it of items ?? []) {
+    for (const it of items) {
       const k = it.format_name as string;
       const e = fmtMap.get(k) ?? { name: k, quantity: 0, revenue: 0 };
       e.quantity += Number(it.quantity);
@@ -571,7 +571,7 @@ export const adminReports = createServerFn({ method: "GET" })
 
     // Expense breakdown by category
     const expMap = new Map<string, number>();
-    for (const e of expenses ?? []) {
+    for (const e of expenses) {
       expMap.set(e.category, (expMap.get(e.category) ?? 0) + Number(e.amount_km));
     }
     const expenseByCategory = [...expMap.entries()]
@@ -580,22 +580,22 @@ export const adminReports = createServerFn({ method: "GET" })
 
     // Status distribution
     const statusDist: Record<string, number> = {};
-    for (const o of orders!) statusDist[o.status] = (statusDist[o.status] ?? 0) + 1;
+    for (const o of orders) statusDist[o.status] = (statusDist[o.status] ?? 0) + 1;
 
     const totalRevenue = completed.reduce((s, r) => s + net(r), 0);
-    const totalExpenses = (expenses ?? []).reduce((s, r: any) => s + Number(r.amount_km), 0);
+    const totalExpenses = (expenses).reduce((s, r: any) => s + Number(r.amount_km), 0);
 
     return {
       report: {
         totals: {
-          orders: orders!.length,
+          orders: orders.length,
           completed: completed.length,
           cancelled: cancelled.length,
           revenue: totalRevenue,
           expenses: totalExpenses,
           profit: totalRevenue - totalExpenses,
           avgOrderValue: completed.length ? totalRevenue / completed.length : 0,
-          completionRate: orders!.length ? (completed.length / orders!.length) * 100 : 0,
+          completionRate: orders.length ? (completed.length / orders.length) * 100 : 0,
         },
         thisMonth: {
           orders: thisMonthOrders.length,

@@ -75,14 +75,23 @@ function AdminLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-[oklch(0.985_0.004_250)] sm:flex-row">
       <aside className="flex flex-col border-b border-border bg-card/80 backdrop-blur-xl sm:w-64 sm:border-b-0 sm:border-r">
-        <div className="flex items-center gap-2.5 px-5 py-5">
-          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-primary to-[oklch(0.45_0.18_270)] text-primary-foreground shadow-[var(--shadow-soft)]">
-            <Camera className="h-4 w-4" />
-          </span>
-          <div>
-            <div className="text-sm font-semibold tracking-tight">FotoPrint BiH</div>
-            <div className="text-[11px] text-muted-foreground">Admin panel</div>
-          </div>
+        <div className="flex items-center justify-between gap-2.5 px-5 py-5">
+          <Link to="/" className="flex items-center gap-2.5 hover:opacity-90">
+            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-primary to-[oklch(0.45_0.18_270)] text-primary-foreground shadow-[var(--shadow-soft)]">
+              <Camera className="h-4 w-4" />
+            </span>
+            <div>
+              <div className="text-sm font-semibold tracking-tight">FotoPrint BiH</div>
+              <div className="text-[11px] text-muted-foreground">Kontrolni panel</div>
+            </div>
+          </Link>
+          <Link
+            to="/"
+            title="Otvori sajt"
+            className="grid h-8 w-8 place-items-center rounded-xl border border-border text-muted-foreground transition hover:bg-accent hover:text-foreground"
+          >
+            <Home className="h-4 w-4" />
+          </Link>
         </div>
         <nav className="flex gap-1 px-3 pb-3 sm:flex-col">
           <NavItem to="/panel" icon={<LayoutDashboard className="h-4 w-4" />}>

@@ -15,7 +15,9 @@ import {
   Camera,
   Sliders,
   Receipt,
+  BarChart3,
 } from "lucide-react";
+
 
 import { supabase } from "@/integrations/supabase/client";
 import { checkIsAdmin } from "@/lib/api/formats.functions";

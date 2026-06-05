@@ -38,7 +38,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/admin` },
+          options: { emailRedirectTo: `${window.location.origin}/panel` },
         });
         if (error) throw error;
         toast.success("Provjerite email za potvrdu");
@@ -60,7 +60,7 @@ function AuthPage() {
           {mode === "signin" ? "Admin prijava" : "Kreiraj nalog"}
         </h1>
         <p className="mt-1 text-center text-sm text-muted-foreground">
-          Pristup admin panelu FotoPrint BiH
+          Pristup kontrolnom panelu FotoPrint BiH
         </p>
 
         <form onSubmit={handle} className="mt-6 space-y-4">

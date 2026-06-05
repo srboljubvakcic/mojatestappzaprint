@@ -16,6 +16,7 @@ import {
   Sliders,
   Receipt,
   BarChart3,
+  Home,
 } from "lucide-react";
 
 

@@ -789,6 +789,28 @@ function QtyInput({
   );
 }
 
+function TrustChip({
+  icon,
+  title,
+  subtitle,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card/80 px-4 py-3 text-left shadow-[var(--shadow-soft)] backdrop-blur">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/8 text-primary">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <div className="truncate text-sm font-semibold tracking-tight">{title}</div>
+        <div className="truncate text-[11px] text-muted-foreground">{subtitle}</div>
+      </div>
+    </div>
+  );
+}
+
 function Row({
   label,
   value,

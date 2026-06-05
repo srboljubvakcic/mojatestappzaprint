@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export const Route = createFileRoute("/auth")({
+export const Route = createFileRoute("/prijava")({
   head: () => ({ meta: [{ title: "Admin prijava — FotoPrint BiH" }] }),
   beforeLoad: async () => {
     if (typeof window === "undefined") return;

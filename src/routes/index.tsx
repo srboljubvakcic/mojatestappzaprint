@@ -69,6 +69,8 @@ function HomePage() {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [extras, setExtras] = useState<ExtraItem[]>([]);
   const [sameDay, setSameDay] = useState(false);
+  const [giftPackaging, setGiftPackaging] = useState(false);
+  const [giftMessage, setGiftMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const [customer, setCustomer] = useState({
@@ -195,9 +197,17 @@ function HomePage() {
     const shipping = subtotal > 0 ? (freeShip ? 0 : Number(settings?.shipping_fee ?? 0)) : 0;
     const sameDayFee =
       sameDay && settings?.same_day_enabled ? Number(settings.same_day_price) : 0;
-    const total = subtotal + shipping + sameDayFee;
-    return { subtotal, shipping, sameDayFee, total, qty, freeShip };
-  }, [images, extras, formats, settings, sameDay]);
+    const giftPackFee =
+      giftPackaging && settings?.gift_packaging_enabled
+        ? Number(settings.gift_packaging_price ?? 0)
+        : 0;
+    const giftMsgFee =
+      giftMessage.trim() && settings?.gift_message_enabled
+        ? Number(settings.gift_message_price ?? 0)
+        : 0;
+    const total = subtotal + shipping + sameDayFee + giftPackFee + giftMsgFee;
+    return { subtotal, shipping, sameDayFee, giftPackFee, giftMsgFee, total, qty, freeShip };
+  }, [images, extras, formats, settings, sameDay, giftPackaging, giftMessage]);
 
   const hasItems = images.length + extras.length > 0;
   const canSubmit =
@@ -231,6 +241,8 @@ function HomePage() {
         data: {
           orderRef: orderRef.current,
           same_day: sameDay,
+          gift_packaging: giftPackaging,
+          gift_message: giftMessage.trim() || null,
           customer,
           items,
         },

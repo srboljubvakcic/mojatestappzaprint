@@ -457,7 +457,7 @@ function HomePage() {
 
       {/* Extras: Albums & Gifts */}
       {(albums.length > 0 || gifts.length > 0) && (
-        <section className="mx-auto mt-12 max-w-6xl px-4 sm:px-6">
+        <section id="proizvodi" className="mx-auto mt-12 max-w-6xl px-4 sm:px-6">
           <h3 className="text-lg font-semibold">Dodatni proizvodi</h3>
           <p className="mt-1 text-sm text-muted-foreground">
             Dodajte foto album ili poklon paket uz vašu narudžbu.

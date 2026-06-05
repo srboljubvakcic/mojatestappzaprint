@@ -419,3 +419,130 @@ export const adminDashboardStats = createServerFn({ method: "GET" })
     return { stats };
   });
 
+
+export const adminRecentOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("orders")
+      .select("id, order_number, full_name, city, total_price, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(8);
+    if (error) throw new Error(error.message);
+    return { orders: data ?? [] };
+  });
+
+export const adminReports = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: orders, error } = await supabaseAdmin
+      .from("orders")
+      .select("id, status, total_price, shipping_fee, city, created_at");
+    if (error) throw new Error(error.message);
+
+    const { data: items } = await supabaseAdmin
+      .from("order_items")
+      .select("order_id, format_name, quantity, total_price");
+
+    const { data: expenses } = await supabaseAdmin
+      .from("expenses")
+      .select("amount_km, category, occurred_at");
+
+    const net = (r: any) => Number(r.total_price) - Number(r.shipping_fee ?? 0);
+    const completed = orders!.filter((o) => o.status === "completed");
+    const cancelled = orders!.filter((o) => o.status === "cancelled");
+
+    // This month vs last month
+    const now = new Date();
+    const startThis = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startLast = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endLast = startThis;
+    const inRange = (d: any, a: Date, b: Date) => {
+      const t = new Date(d).getTime();
+      return t >= a.getTime() && t < b.getTime();
+    };
+    const thisMonthOrders = orders!.filter((o) =>
+      inRange(o.created_at, startThis, new Date(now.getFullYear(), now.getMonth() + 1, 1)),
+    );
+    const lastMonthOrders = orders!.filter((o) => inRange(o.created_at, startLast, endLast));
+    const thisMonthRevenue = thisMonthOrders
+      .filter((o) => o.status === "completed")
+      .reduce((s, r) => s + net(r), 0);
+    const lastMonthRevenue = lastMonthOrders
+      .filter((o) => o.status === "completed")
+      .reduce((s, r) => s + net(r), 0);
+
+    // Top cities
+    const cityMap = new Map<string, { city: string; orders: number; revenue: number }>();
+    for (const o of orders!) {
+      const k = (o.city || "—").trim();
+      const e = cityMap.get(k) ?? { city: k, orders: 0, revenue: 0 };
+      e.orders += 1;
+      if (o.status === "completed") e.revenue += net(o);
+      cityMap.set(k, e);
+    }
+    const topCities = [...cityMap.values()]
+      .sort((a, b) => b.orders - a.orders)
+      .slice(0, 8);
+
+    // Top formats by quantity & revenue
+    const fmtMap = new Map<string, { name: string; quantity: number; revenue: number }>();
+    for (const it of items ?? []) {
+      const k = it.format_name as string;
+      const e = fmtMap.get(k) ?? { name: k, quantity: 0, revenue: 0 };
+      e.quantity += Number(it.quantity);
+      e.revenue += Number(it.total_price);
+      fmtMap.set(k, e);
+    }
+    const topFormats = [...fmtMap.values()]
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 8);
+
+    // Expense breakdown by category
+    const expMap = new Map<string, number>();
+    for (const e of expenses ?? []) {
+      expMap.set(e.category, (expMap.get(e.category) ?? 0) + Number(e.amount_km));
+    }
+    const expenseByCategory = [...expMap.entries()]
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount);
+
+    // Status distribution
+    const statusDist: Record<string, number> = {};
+    for (const o of orders!) statusDist[o.status] = (statusDist[o.status] ?? 0) + 1;
+
+    const totalRevenue = completed.reduce((s, r) => s + net(r), 0);
+    const totalExpenses = (expenses ?? []).reduce((s, r: any) => s + Number(r.amount_km), 0);
+
+    return {
+      report: {
+        totals: {
+          orders: orders!.length,
+          completed: completed.length,
+          cancelled: cancelled.length,
+          revenue: totalRevenue,
+          expenses: totalExpenses,
+          profit: totalRevenue - totalExpenses,
+          avgOrderValue: completed.length ? totalRevenue / completed.length : 0,
+          completionRate: orders!.length ? (completed.length / orders!.length) * 100 : 0,
+        },
+        thisMonth: {
+          orders: thisMonthOrders.length,
+          revenue: thisMonthRevenue,
+        },
+        lastMonth: {
+          orders: lastMonthOrders.length,
+          revenue: lastMonthRevenue,
+        },
+        topCities,
+        topFormats,
+        expenseByCategory,
+        statusDist,
+      },
+    };
+  });

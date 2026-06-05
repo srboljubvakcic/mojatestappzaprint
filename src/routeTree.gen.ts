@@ -16,6 +16,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PorudzbinaIdRouteImport } from './routes/porudzbina.$id'
 import { Route as AdminTroskoviRouteImport } from './routes/admin.troskovi'
 import { Route as AdminPostavkeRouteImport } from './routes/admin.postavke'
+import { Route as AdminIzvjestajiRouteImport } from './routes/admin.izvjestaji'
 import { Route as AdminFormatiRouteImport } from './routes/admin.formati'
 import { Route as AdminPorudzbineIndexRouteImport } from './routes/admin.porudzbine.index'
 import { Route as AdminPorudzbineIdRouteImport } from './routes/admin.porudzbine.$id'
@@ -56,6 +57,11 @@ const AdminPostavkeRoute = AdminPostavkeRouteImport.update({
   path: '/postavke',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminIzvjestajiRoute = AdminIzvjestajiRouteImport.update({
+  id: '/izvjestaji',
+  path: '/izvjestaji',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminFormatiRoute = AdminFormatiRouteImport.update({
   id: '/formati',
   path: '/formati',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/prijava': typeof PrijavaRoute
   '/admin/formati': typeof AdminFormatiRoute
+  '/admin/izvjestaji': typeof AdminIzvjestajiRoute
   '/admin/postavke': typeof AdminPostavkeRoute
   '/admin/troskovi': typeof AdminTroskoviRoute
   '/porudzbina/$id': typeof PorudzbinaIdRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/prijava': typeof PrijavaRoute
   '/admin/formati': typeof AdminFormatiRoute
+  '/admin/izvjestaji': typeof AdminIzvjestajiRoute
   '/admin/postavke': typeof AdminPostavkeRoute
   '/admin/troskovi': typeof AdminTroskoviRoute
   '/porudzbina/$id': typeof PorudzbinaIdRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/prijava': typeof PrijavaRoute
   '/admin/formati': typeof AdminFormatiRoute
+  '/admin/izvjestaji': typeof AdminIzvjestajiRoute
   '/admin/postavke': typeof AdminPostavkeRoute
   '/admin/troskovi': typeof AdminTroskoviRoute
   '/porudzbina/$id': typeof PorudzbinaIdRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/prijava'
     | '/admin/formati'
+    | '/admin/izvjestaji'
     | '/admin/postavke'
     | '/admin/troskovi'
     | '/porudzbina/$id'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/'
     | '/prijava'
     | '/admin/formati'
+    | '/admin/izvjestaji'
     | '/admin/postavke'
     | '/admin/troskovi'
     | '/porudzbina/$id'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/prijava'
     | '/admin/formati'
+    | '/admin/izvjestaji'
     | '/admin/postavke'
     | '/admin/troskovi'
     | '/porudzbina/$id'
@@ -217,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPostavkeRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/izvjestaji': {
+      id: '/admin/izvjestaji'
+      path: '/izvjestaji'
+      fullPath: '/admin/izvjestaji'
+      preLoaderRoute: typeof AdminIzvjestajiRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/formati': {
       id: '/admin/formati'
       path: '/formati'
@@ -250,6 +269,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminFormatiRoute: typeof AdminFormatiRoute
+  AdminIzvjestajiRoute: typeof AdminIzvjestajiRoute
   AdminPostavkeRoute: typeof AdminPostavkeRoute
   AdminTroskoviRoute: typeof AdminTroskoviRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -259,6 +279,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminFormatiRoute: AdminFormatiRoute,
+  AdminIzvjestajiRoute: AdminIzvjestajiRoute,
   AdminPostavkeRoute: AdminPostavkeRoute,
   AdminTroskoviRoute: AdminTroskoviRoute,
   AdminIndexRoute: AdminIndexRoute,

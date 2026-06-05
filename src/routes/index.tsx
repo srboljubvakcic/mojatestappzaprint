@@ -300,7 +300,7 @@ function HomePage() {
           )}
           {settings?.same_day_enabled && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1.5 text-warning-foreground">
-              <Zap className="h-3.5 w-3.5" /> Same day print dostupan
+              <Zap className="h-3.5 w-3.5" /> Štampa istog dana dostupan
             </span>
           )}
           <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5">
@@ -568,7 +568,7 @@ function HomePage() {
                   </span>
                   <div>
                     <Label className="cursor-pointer text-sm font-semibold">
-                      Same day print
+                      Štampa istog dana
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Hitna štampa istog dana · +
@@ -653,7 +653,7 @@ function HomePage() {
                   muted
                 />
                 {totals.sameDayFee > 0 && (
-                  <Row label="Same day print" value={formatKM(totals.sameDayFee)} muted />
+                  <Row label="Štampa istog dana" value={formatKM(totals.sameDayFee)} muted />
                 )}
                 {totals.giftPackFee > 0 && (
                   <Row label="Poklon pakovanje" value={formatKM(totals.giftPackFee)} muted />

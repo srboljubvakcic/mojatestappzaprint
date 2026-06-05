@@ -82,7 +82,7 @@ function OrdersList() {
                       </span>
                       {o.same_day && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-medium text-warning-foreground">
-                          <Zap className="h-3 w-3" /> Same day
+                          <Zap className="h-3 w-3" /> Istog dana
                         </span>
                       )}
                     </div>

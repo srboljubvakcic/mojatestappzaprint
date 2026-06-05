@@ -120,7 +120,7 @@ function OrderDetail() {
             </h1>
             {order.same_day && (
               <span className="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-1 text-xs font-medium text-warning-foreground">
-                <Zap className="h-3 w-3" /> Same day
+                <Zap className="h-3 w-3" /> Istog dana
               </span>
             )}
           </div>
@@ -287,7 +287,7 @@ function OrderDetail() {
               </div>
               {Number(order.same_day_fee) > 0 && (
                 <div className="flex justify-between text-muted-foreground">
-                  <dt>Same day print</dt>
+                  <dt>Štampa istog dana</dt>
                   <dd className="tabular-nums">{formatKM(Number(order.same_day_fee))}</dd>
                 </div>
               )}

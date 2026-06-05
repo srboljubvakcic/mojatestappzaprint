@@ -13,7 +13,7 @@ export const Route = createFileRoute("/prijava")({
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();
-    if (data.session) throw redirect({ to: "/admin" });
+    if (data.session) throw redirect({ to: "/panel" });
   },
   component: AuthPage,
 });
@@ -33,7 +33,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Prijava uspješna");
-        navigate({ to: "/admin" });
+        navigate({ to: "/panel" });
       } else {
         const { error } = await supabase.auth.signUp({
           email,

@@ -10,16 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrijavaRouteImport } from './routes/prijava'
-import { Route as AdminRouteImport } from './routes/admin'
+import { Route as PanelRouteImport } from './routes/panel'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as PanelIndexRouteImport } from './routes/panel.index'
 import { Route as PorudzbinaIdRouteImport } from './routes/porudzbina.$id'
-import { Route as AdminTroskoviRouteImport } from './routes/admin.troskovi'
-import { Route as AdminPostavkeRouteImport } from './routes/admin.postavke'
-import { Route as AdminIzvjestajiRouteImport } from './routes/admin.izvjestaji'
-import { Route as AdminFormatiRouteImport } from './routes/admin.formati'
-import { Route as AdminPorudzbineIndexRouteImport } from './routes/admin.porudzbine.index'
-import { Route as AdminPorudzbineIdRouteImport } from './routes/admin.porudzbine.$id'
+import { Route as PanelTroskoviRouteImport } from './routes/panel.troskovi'
+import { Route as PanelPostavkeRouteImport } from './routes/panel.postavke'
+import { Route as PanelIzvjestajiRouteImport } from './routes/panel.izvjestaji'
+import { Route as PanelFormatiRouteImport } from './routes/panel.formati'
+import { Route as PanelPorudzbineIndexRouteImport } from './routes/panel.porudzbine.index'
+import { Route as PanelPorudzbineIdRouteImport } from './routes/panel.porudzbine.$id'
 import { Route as ApiPublicHooksCleanupImagesRouteImport } from './routes/api/public/hooks/cleanup-images'
 
 const PrijavaRoute = PrijavaRouteImport.update({
@@ -27,9 +27,9 @@ const PrijavaRoute = PrijavaRouteImport.update({
   path: '/prijava',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const PanelRoute = PanelRouteImport.update({
+  id: '/panel',
+  path: '/panel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,45 +37,45 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
+const PanelIndexRoute = PanelIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => PanelRoute,
 } as any)
 const PorudzbinaIdRoute = PorudzbinaIdRouteImport.update({
   id: '/porudzbina/$id',
   path: '/porudzbina/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminTroskoviRoute = AdminTroskoviRouteImport.update({
+const PanelTroskoviRoute = PanelTroskoviRouteImport.update({
   id: '/troskovi',
   path: '/troskovi',
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => PanelRoute,
 } as any)
-const AdminPostavkeRoute = AdminPostavkeRouteImport.update({
+const PanelPostavkeRoute = PanelPostavkeRouteImport.update({
   id: '/postavke',
   path: '/postavke',
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => PanelRoute,
 } as any)
-const AdminIzvjestajiRoute = AdminIzvjestajiRouteImport.update({
+const PanelIzvjestajiRoute = PanelIzvjestajiRouteImport.update({
   id: '/izvjestaji',
   path: '/izvjestaji',
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => PanelRoute,
 } as any)
-const AdminFormatiRoute = AdminFormatiRouteImport.update({
+const PanelFormatiRoute = PanelFormatiRouteImport.update({
   id: '/formati',
   path: '/formati',
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => PanelRoute,
 } as any)
-const AdminPorudzbineIndexRoute = AdminPorudzbineIndexRouteImport.update({
+const PanelPorudzbineIndexRoute = PanelPorudzbineIndexRouteImport.update({
   id: '/porudzbine/',
   path: '/porudzbine/',
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => PanelRoute,
 } as any)
-const AdminPorudzbineIdRoute = AdminPorudzbineIdRouteImport.update({
+const PanelPorudzbineIdRoute = PanelPorudzbineIdRouteImport.update({
   id: '/porudzbine/$id',
   path: '/porudzbine/$id',
-  getParentRoute: () => AdminRoute,
+  getParentRoute: () => PanelRoute,
 } as any)
 const ApiPublicHooksCleanupImagesRoute =
   ApiPublicHooksCleanupImagesRouteImport.update({
@@ -86,93 +86,93 @@ const ApiPublicHooksCleanupImagesRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
+  '/panel': typeof PanelRouteWithChildren
   '/prijava': typeof PrijavaRoute
-  '/admin/formati': typeof AdminFormatiRoute
-  '/admin/izvjestaji': typeof AdminIzvjestajiRoute
-  '/admin/postavke': typeof AdminPostavkeRoute
-  '/admin/troskovi': typeof AdminTroskoviRoute
+  '/panel/formati': typeof PanelFormatiRoute
+  '/panel/izvjestaji': typeof PanelIzvjestajiRoute
+  '/panel/postavke': typeof PanelPostavkeRoute
+  '/panel/troskovi': typeof PanelTroskoviRoute
   '/porudzbina/$id': typeof PorudzbinaIdRoute
-  '/admin/': typeof AdminIndexRoute
-  '/admin/porudzbine/$id': typeof AdminPorudzbineIdRoute
-  '/admin/porudzbine/': typeof AdminPorudzbineIndexRoute
+  '/panel/': typeof PanelIndexRoute
+  '/panel/porudzbine/$id': typeof PanelPorudzbineIdRoute
+  '/panel/porudzbine/': typeof PanelPorudzbineIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/prijava': typeof PrijavaRoute
-  '/admin/formati': typeof AdminFormatiRoute
-  '/admin/izvjestaji': typeof AdminIzvjestajiRoute
-  '/admin/postavke': typeof AdminPostavkeRoute
-  '/admin/troskovi': typeof AdminTroskoviRoute
+  '/panel/formati': typeof PanelFormatiRoute
+  '/panel/izvjestaji': typeof PanelIzvjestajiRoute
+  '/panel/postavke': typeof PanelPostavkeRoute
+  '/panel/troskovi': typeof PanelTroskoviRoute
   '/porudzbina/$id': typeof PorudzbinaIdRoute
-  '/admin': typeof AdminIndexRoute
-  '/admin/porudzbine/$id': typeof AdminPorudzbineIdRoute
-  '/admin/porudzbine': typeof AdminPorudzbineIndexRoute
+  '/panel': typeof PanelIndexRoute
+  '/panel/porudzbine/$id': typeof PanelPorudzbineIdRoute
+  '/panel/porudzbine': typeof PanelPorudzbineIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
+  '/panel': typeof PanelRouteWithChildren
   '/prijava': typeof PrijavaRoute
-  '/admin/formati': typeof AdminFormatiRoute
-  '/admin/izvjestaji': typeof AdminIzvjestajiRoute
-  '/admin/postavke': typeof AdminPostavkeRoute
-  '/admin/troskovi': typeof AdminTroskoviRoute
+  '/panel/formati': typeof PanelFormatiRoute
+  '/panel/izvjestaji': typeof PanelIzvjestajiRoute
+  '/panel/postavke': typeof PanelPostavkeRoute
+  '/panel/troskovi': typeof PanelTroskoviRoute
   '/porudzbina/$id': typeof PorudzbinaIdRoute
-  '/admin/': typeof AdminIndexRoute
-  '/admin/porudzbine/$id': typeof AdminPorudzbineIdRoute
-  '/admin/porudzbine/': typeof AdminPorudzbineIndexRoute
+  '/panel/': typeof PanelIndexRoute
+  '/panel/porudzbine/$id': typeof PanelPorudzbineIdRoute
+  '/panel/porudzbine/': typeof PanelPorudzbineIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
+    | '/panel'
     | '/prijava'
-    | '/admin/formati'
-    | '/admin/izvjestaji'
-    | '/admin/postavke'
-    | '/admin/troskovi'
+    | '/panel/formati'
+    | '/panel/izvjestaji'
+    | '/panel/postavke'
+    | '/panel/troskovi'
     | '/porudzbina/$id'
-    | '/admin/'
-    | '/admin/porudzbine/$id'
-    | '/admin/porudzbine/'
+    | '/panel/'
+    | '/panel/porudzbine/$id'
+    | '/panel/porudzbine/'
     | '/api/public/hooks/cleanup-images'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/prijava'
-    | '/admin/formati'
-    | '/admin/izvjestaji'
-    | '/admin/postavke'
-    | '/admin/troskovi'
+    | '/panel/formati'
+    | '/panel/izvjestaji'
+    | '/panel/postavke'
+    | '/panel/troskovi'
     | '/porudzbina/$id'
-    | '/admin'
-    | '/admin/porudzbine/$id'
-    | '/admin/porudzbine'
+    | '/panel'
+    | '/panel/porudzbine/$id'
+    | '/panel/porudzbine'
     | '/api/public/hooks/cleanup-images'
   id:
     | '__root__'
     | '/'
-    | '/admin'
+    | '/panel'
     | '/prijava'
-    | '/admin/formati'
-    | '/admin/izvjestaji'
-    | '/admin/postavke'
-    | '/admin/troskovi'
+    | '/panel/formati'
+    | '/panel/izvjestaji'
+    | '/panel/postavke'
+    | '/panel/troskovi'
     | '/porudzbina/$id'
-    | '/admin/'
-    | '/admin/porudzbine/$id'
-    | '/admin/porudzbine/'
+    | '/panel/'
+    | '/panel/porudzbine/$id'
+    | '/panel/porudzbine/'
     | '/api/public/hooks/cleanup-images'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRouteWithChildren
+  PanelRoute: typeof PanelRouteWithChildren
   PrijavaRoute: typeof PrijavaRoute
   PorudzbinaIdRoute: typeof PorudzbinaIdRoute
   ApiPublicHooksCleanupImagesRoute: typeof ApiPublicHooksCleanupImagesRoute
@@ -187,11 +187,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrijavaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/panel': {
+      id: '/panel'
+      path: '/panel'
+      fullPath: '/panel'
+      preLoaderRoute: typeof PanelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -201,12 +201,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
+    '/panel/': {
+      id: '/panel/'
       path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
+      fullPath: '/panel/'
+      preLoaderRoute: typeof PanelIndexRouteImport
+      parentRoute: typeof PanelRoute
     }
     '/porudzbina/$id': {
       id: '/porudzbina/$id'
@@ -215,47 +215,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PorudzbinaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/troskovi': {
-      id: '/admin/troskovi'
+    '/panel/troskovi': {
+      id: '/panel/troskovi'
       path: '/troskovi'
-      fullPath: '/admin/troskovi'
-      preLoaderRoute: typeof AdminTroskoviRouteImport
-      parentRoute: typeof AdminRoute
+      fullPath: '/panel/troskovi'
+      preLoaderRoute: typeof PanelTroskoviRouteImport
+      parentRoute: typeof PanelRoute
     }
-    '/admin/postavke': {
-      id: '/admin/postavke'
+    '/panel/postavke': {
+      id: '/panel/postavke'
       path: '/postavke'
-      fullPath: '/admin/postavke'
-      preLoaderRoute: typeof AdminPostavkeRouteImport
-      parentRoute: typeof AdminRoute
+      fullPath: '/panel/postavke'
+      preLoaderRoute: typeof PanelPostavkeRouteImport
+      parentRoute: typeof PanelRoute
     }
-    '/admin/izvjestaji': {
-      id: '/admin/izvjestaji'
+    '/panel/izvjestaji': {
+      id: '/panel/izvjestaji'
       path: '/izvjestaji'
-      fullPath: '/admin/izvjestaji'
-      preLoaderRoute: typeof AdminIzvjestajiRouteImport
-      parentRoute: typeof AdminRoute
+      fullPath: '/panel/izvjestaji'
+      preLoaderRoute: typeof PanelIzvjestajiRouteImport
+      parentRoute: typeof PanelRoute
     }
-    '/admin/formati': {
-      id: '/admin/formati'
+    '/panel/formati': {
+      id: '/panel/formati'
       path: '/formati'
-      fullPath: '/admin/formati'
-      preLoaderRoute: typeof AdminFormatiRouteImport
-      parentRoute: typeof AdminRoute
+      fullPath: '/panel/formati'
+      preLoaderRoute: typeof PanelFormatiRouteImport
+      parentRoute: typeof PanelRoute
     }
-    '/admin/porudzbine/': {
-      id: '/admin/porudzbine/'
+    '/panel/porudzbine/': {
+      id: '/panel/porudzbine/'
       path: '/porudzbine'
-      fullPath: '/admin/porudzbine/'
-      preLoaderRoute: typeof AdminPorudzbineIndexRouteImport
-      parentRoute: typeof AdminRoute
+      fullPath: '/panel/porudzbine/'
+      preLoaderRoute: typeof PanelPorudzbineIndexRouteImport
+      parentRoute: typeof PanelRoute
     }
-    '/admin/porudzbine/$id': {
-      id: '/admin/porudzbine/$id'
+    '/panel/porudzbine/$id': {
+      id: '/panel/porudzbine/$id'
       path: '/porudzbine/$id'
-      fullPath: '/admin/porudzbine/$id'
-      preLoaderRoute: typeof AdminPorudzbineIdRouteImport
-      parentRoute: typeof AdminRoute
+      fullPath: '/panel/porudzbine/$id'
+      preLoaderRoute: typeof PanelPorudzbineIdRouteImport
+      parentRoute: typeof PanelRoute
     }
     '/api/public/hooks/cleanup-images': {
       id: '/api/public/hooks/cleanup-images'
@@ -267,31 +267,31 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminRouteChildren {
-  AdminFormatiRoute: typeof AdminFormatiRoute
-  AdminIzvjestajiRoute: typeof AdminIzvjestajiRoute
-  AdminPostavkeRoute: typeof AdminPostavkeRoute
-  AdminTroskoviRoute: typeof AdminTroskoviRoute
-  AdminIndexRoute: typeof AdminIndexRoute
-  AdminPorudzbineIdRoute: typeof AdminPorudzbineIdRoute
-  AdminPorudzbineIndexRoute: typeof AdminPorudzbineIndexRoute
+interface PanelRouteChildren {
+  PanelFormatiRoute: typeof PanelFormatiRoute
+  PanelIzvjestajiRoute: typeof PanelIzvjestajiRoute
+  PanelPostavkeRoute: typeof PanelPostavkeRoute
+  PanelTroskoviRoute: typeof PanelTroskoviRoute
+  PanelIndexRoute: typeof PanelIndexRoute
+  PanelPorudzbineIdRoute: typeof PanelPorudzbineIdRoute
+  PanelPorudzbineIndexRoute: typeof PanelPorudzbineIndexRoute
 }
 
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminFormatiRoute: AdminFormatiRoute,
-  AdminIzvjestajiRoute: AdminIzvjestajiRoute,
-  AdminPostavkeRoute: AdminPostavkeRoute,
-  AdminTroskoviRoute: AdminTroskoviRoute,
-  AdminIndexRoute: AdminIndexRoute,
-  AdminPorudzbineIdRoute: AdminPorudzbineIdRoute,
-  AdminPorudzbineIndexRoute: AdminPorudzbineIndexRoute,
+const PanelRouteChildren: PanelRouteChildren = {
+  PanelFormatiRoute: PanelFormatiRoute,
+  PanelIzvjestajiRoute: PanelIzvjestajiRoute,
+  PanelPostavkeRoute: PanelPostavkeRoute,
+  PanelTroskoviRoute: PanelTroskoviRoute,
+  PanelIndexRoute: PanelIndexRoute,
+  PanelPorudzbineIdRoute: PanelPorudzbineIdRoute,
+  PanelPorudzbineIndexRoute: PanelPorudzbineIndexRoute,
 }
 
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+const PanelRouteWithChildren = PanelRoute._addFileChildren(PanelRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRouteWithChildren,
+  PanelRoute: PanelRouteWithChildren,
   PrijavaRoute: PrijavaRoute,
   PorudzbinaIdRoute: PorudzbinaIdRoute,
   ApiPublicHooksCleanupImagesRoute: ApiPublicHooksCleanupImagesRoute,
@@ -299,3 +299,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

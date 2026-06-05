@@ -8,7 +8,7 @@ import { adminListOrders } from "@/lib/api/orders.functions";
 import { formatKM, formatOrderNo } from "@/lib/format";
 import { STATUS_LABEL, STATUS_ORDER, STATUS_STYLES } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/porudzbine/")({
+export const Route = createFileRoute("/panel/porudzbine/")({
   component: OrdersList,
 });
 
@@ -65,7 +65,7 @@ function OrdersList() {
             {data.orders.map((o: any) => (
               <li key={o.id}>
                 <Link
-                  to="/admin/porudzbine/$id"
+                  to="/panel/porudzbine/$id"
                   params={{ id: o.id }}
                   className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-accent/40"
                 >

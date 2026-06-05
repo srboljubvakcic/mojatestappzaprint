@@ -22,7 +22,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { checkIsAdmin } from "@/lib/api/formats.functions";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/panel")({
   ssr: false,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
@@ -85,23 +85,23 @@ function AdminLayout() {
           </div>
         </div>
         <nav className="flex gap-1 px-3 pb-3 sm:flex-col">
-          <NavItem to="/admin" icon={<LayoutDashboard className="h-4 w-4" />}>
+          <NavItem to="/panel" icon={<LayoutDashboard className="h-4 w-4" />}>
             Pregled
           </NavItem>
-          <NavItem to="/admin/porudzbine" icon={<Package className="h-4 w-4" />}>
+          <NavItem to="/panel/porudzbine" icon={<Package className="h-4 w-4" />}>
             Narudžbe
           </NavItem>
-          <NavItem to="/admin/formati" icon={<Settings className="h-4 w-4" />}>
+          <NavItem to="/panel/formati" icon={<Settings className="h-4 w-4" />}>
             Proizvodi
           </NavItem>
-          <NavItem to="/admin/izvjestaji" icon={<BarChart3 className="h-4 w-4" />}>
+          <NavItem to="/panel/izvjestaji" icon={<BarChart3 className="h-4 w-4" />}>
             Izvještaji
           </NavItem>
-          <NavItem to="/admin/troskovi" icon={<Receipt className="h-4 w-4" />}>
+          <NavItem to="/panel/troskovi" icon={<Receipt className="h-4 w-4" />}>
             Troškovi
           </NavItem>
 
-          <NavItem to="/admin/postavke" icon={<Sliders className="h-4 w-4" />}>
+          <NavItem to="/panel/postavke" icon={<Sliders className="h-4 w-4" />}>
             Postavke
           </NavItem>
         </nav>
@@ -139,7 +139,7 @@ function NavItem({
   return (
     <Link
       to={to}
-      activeOptions={{ exact: to === "/admin" }}
+      activeOptions={{ exact: to === "/panel" }}
       activeProps={{
         className:
           "flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium text-primary",

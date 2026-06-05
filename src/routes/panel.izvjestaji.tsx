@@ -24,7 +24,7 @@ import { adminReports } from "@/lib/api/orders.functions";
 import { formatKM } from "@/lib/format";
 import { STATUS_LABEL } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/izvjestaji")({
+export const Route = createFileRoute("/panel/izvjestaji")({
   component: ReportsPage,
 });
 

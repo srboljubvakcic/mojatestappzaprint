@@ -18,6 +18,10 @@ export type Database = {
         Row: {
           free_shipping_enabled: boolean
           free_shipping_threshold: number
+          gift_message_enabled: boolean
+          gift_message_price: number
+          gift_packaging_enabled: boolean
+          gift_packaging_price: number
           id: number
           same_day_enabled: boolean
           same_day_price: number
@@ -27,6 +31,10 @@ export type Database = {
         Insert: {
           free_shipping_enabled?: boolean
           free_shipping_threshold?: number
+          gift_message_enabled?: boolean
+          gift_message_price?: number
+          gift_packaging_enabled?: boolean
+          gift_packaging_price?: number
           id?: number
           same_day_enabled?: boolean
           same_day_price?: number
@@ -36,6 +44,10 @@ export type Database = {
         Update: {
           free_shipping_enabled?: boolean
           free_shipping_threshold?: number
+          gift_message_enabled?: boolean
+          gift_message_price?: number
+          gift_packaging_enabled?: boolean
+          gift_packaging_price?: number
           id?: number
           same_day_enabled?: boolean
           same_day_price?: number
@@ -210,6 +222,10 @@ export type Database = {
           created_at: string
           email: string | null
           full_name: string
+          gift_message: string | null
+          gift_message_fee: number
+          gift_packaging: boolean
+          gift_packaging_fee: number
           id: string
           notes: string | null
           order_number: number
@@ -228,6 +244,10 @@ export type Database = {
           created_at?: string
           email?: string | null
           full_name: string
+          gift_message?: string | null
+          gift_message_fee?: number
+          gift_packaging?: boolean
+          gift_packaging_fee?: number
           id?: string
           notes?: string | null
           order_number?: number
@@ -246,6 +266,10 @@ export type Database = {
           created_at?: string
           email?: string | null
           full_name?: string
+          gift_message?: string | null
+          gift_message_fee?: number
+          gift_packaging?: boolean
+          gift_packaging_fee?: number
           id?: string
           notes?: string | null
           order_number?: number

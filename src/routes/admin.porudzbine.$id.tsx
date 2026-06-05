@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { STATUS_LABEL, STATUS_ORDER, STATUS_STYLES } from "@/components/order-status";
 
-export const Route = createFileRoute("/admin/orders/$id")({
+export const Route = createFileRoute("/admin/porudzbine/$id")({
   component: OrderDetail,
 });
 
@@ -63,7 +63,7 @@ function OrderDetail() {
   if (error || !data) {
     return (
       <div className="p-10">
-        <Link to="/admin/orders" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/admin/porudzbine" className="text-sm text-muted-foreground hover:text-foreground">
           ← Sve narudžbe
         </Link>
         <div className="mt-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
@@ -106,7 +106,7 @@ function OrderDetail() {
   return (
     <div className="p-6 sm:p-10">
       <Link
-        to="/admin/orders"
+        to="/admin/porudzbine"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" /> Sve narudžbe
@@ -289,6 +289,24 @@ function OrderDetail() {
                 <div className="flex justify-between text-muted-foreground">
                   <dt>Same day print</dt>
                   <dd className="tabular-nums">{formatKM(Number(order.same_day_fee))}</dd>
+                </div>
+              )}
+              {Number(order.gift_packaging_fee) > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>Poklon pakovanje</dt>
+                  <dd className="tabular-nums">{formatKM(Number(order.gift_packaging_fee))}</dd>
+                </div>
+              )}
+              {Number(order.gift_message_fee) > 0 && (
+                <div className="flex justify-between text-muted-foreground">
+                  <dt>Poklon poruka</dt>
+                  <dd className="tabular-nums">{formatKM(Number(order.gift_message_fee))}</dd>
+                </div>
+              )}
+              {order.gift_message && (
+                <div className="mt-2 rounded-xl border border-primary/20 bg-primary/5 p-3">
+                  <div className="text-xs font-semibold text-primary">Poklon poruka</div>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{order.gift_message}</p>
                 </div>
               )}
               <div className="flex items-baseline justify-between pt-2">

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Truck, Zap, Save } from "lucide-react";
+import { Truck, Zap, Save, Gift, MessageSquareHeart } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-export const Route = createFileRoute("/admin/settings")({
+export const Route = createFileRoute("/admin/postavke")({
   component: SettingsPage,
 });
 
@@ -33,6 +33,10 @@ function SettingsPage() {
     shipping_fee: 10,
     same_day_enabled: false,
     same_day_price: 15,
+    gift_packaging_enabled: false,
+    gift_packaging_price: 3,
+    gift_message_enabled: false,
+    gift_message_price: 1,
   });
 
   useEffect(() => {
@@ -43,6 +47,10 @@ function SettingsPage() {
         shipping_fee: Number(data.settings.shipping_fee),
         same_day_enabled: !!data.settings.same_day_enabled,
         same_day_price: Number(data.settings.same_day_price),
+        gift_packaging_enabled: !!data.settings.gift_packaging_enabled,
+        gift_packaging_price: Number(data.settings.gift_packaging_price ?? 3),
+        gift_message_enabled: !!data.settings.gift_message_enabled,
+        gift_message_price: Number(data.settings.gift_message_price ?? 1),
       });
     }
   }, [data]);
@@ -138,6 +146,64 @@ function SettingsPage() {
               }
               className="mt-1.5"
               disabled={!form.same_day_enabled}
+            />
+          </div>
+        </Card>
+
+        <Card icon={<Gift className="h-4 w-4" />} title="Premium poklon pakovanje">
+          <div className="flex items-center justify-between rounded-xl bg-secondary px-4 py-3">
+            <div>
+              <Label className="cursor-pointer">Omogući poklon pakovanje</Label>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Korisnik može izabrati premium pakovanje uz doplatu
+              </p>
+            </div>
+            <Switch
+              checked={form.gift_packaging_enabled}
+              onCheckedChange={(v) => setForm({ ...form, gift_packaging_enabled: v })}
+            />
+          </div>
+          <div>
+            <Label>Cijena poklon pakovanja (KM)</Label>
+            <Input
+              type="number"
+              min="0"
+              step="0.5"
+              value={form.gift_packaging_price}
+              onChange={(e) =>
+                setForm({ ...form, gift_packaging_price: Number(e.target.value) })
+              }
+              className="mt-1.5"
+              disabled={!form.gift_packaging_enabled}
+            />
+          </div>
+        </Card>
+
+        <Card icon={<MessageSquareHeart className="h-4 w-4" />} title="Poklon poruka">
+          <div className="flex items-center justify-between rounded-xl bg-secondary px-4 py-3">
+            <div>
+              <Label className="cursor-pointer">Omogući poklon poruku</Label>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Korisnik može napisati ličnu poruku uz dodatnu naknadu
+              </p>
+            </div>
+            <Switch
+              checked={form.gift_message_enabled}
+              onCheckedChange={(v) => setForm({ ...form, gift_message_enabled: v })}
+            />
+          </div>
+          <div>
+            <Label>Cijena poklon poruke (KM)</Label>
+            <Input
+              type="number"
+              min="0"
+              step="0.5"
+              value={form.gift_message_price}
+              onChange={(e) =>
+                setForm({ ...form, gift_message_price: Number(e.target.value) })
+              }
+              className="mt-1.5"
+              disabled={!form.gift_message_enabled}
             />
           </div>
         </Card>

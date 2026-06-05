@@ -69,6 +69,8 @@ function HomePage() {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [extras, setExtras] = useState<ExtraItem[]>([]);
   const [sameDay, setSameDay] = useState(false);
+  const [giftPackaging, setGiftPackaging] = useState(false);
+  const [giftMessage, setGiftMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const [customer, setCustomer] = useState({
@@ -195,9 +197,17 @@ function HomePage() {
     const shipping = subtotal > 0 ? (freeShip ? 0 : Number(settings?.shipping_fee ?? 0)) : 0;
     const sameDayFee =
       sameDay && settings?.same_day_enabled ? Number(settings.same_day_price) : 0;
-    const total = subtotal + shipping + sameDayFee;
-    return { subtotal, shipping, sameDayFee, total, qty, freeShip };
-  }, [images, extras, formats, settings, sameDay]);
+    const giftPackFee =
+      giftPackaging && settings?.gift_packaging_enabled
+        ? Number(settings.gift_packaging_price ?? 0)
+        : 0;
+    const giftMsgFee =
+      giftMessage.trim() && settings?.gift_message_enabled
+        ? Number(settings.gift_message_price ?? 0)
+        : 0;
+    const total = subtotal + shipping + sameDayFee + giftPackFee + giftMsgFee;
+    return { subtotal, shipping, sameDayFee, giftPackFee, giftMsgFee, total, qty, freeShip };
+  }, [images, extras, formats, settings, sameDay, giftPackaging, giftMessage]);
 
   const hasItems = images.length + extras.length > 0;
   const canSubmit =
@@ -231,6 +241,8 @@ function HomePage() {
         data: {
           orderRef: orderRef.current,
           same_day: sameDay,
+          gift_packaging: giftPackaging,
+          gift_message: giftMessage.trim() || null,
           customer,
           items,
         },
@@ -239,7 +251,7 @@ function HomePage() {
         description: "Kontaktiraćemo vas uskoro za potvrdu.",
       });
       navigate({
-        to: "/order/$id",
+        to: "/porudzbina/$id",
         params: { id: orderId },
         search: { total: totals.total },
       });
@@ -568,6 +580,52 @@ function HomePage() {
               </div>
             )}
 
+            {settings?.gift_packaging_enabled && (
+              <div className="flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary">
+                    <Gift className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <Label className="cursor-pointer text-sm font-semibold">
+                      Premium poklon pakovanje
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Elegantno pakovanje · +
+                      {formatKM(Number(settings.gift_packaging_price ?? 0))}
+                    </p>
+                  </div>
+                </div>
+                <Switch checked={giftPackaging} onCheckedChange={setGiftPackaging} />
+              </div>
+            )}
+
+            {settings?.gift_message_enabled && (
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/15 text-primary">
+                    <Sparkles className="h-4 w-4" />
+                  </span>
+                  <div className="flex-1">
+                    <Label className="text-sm font-semibold">
+                      Poklon poruka
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Lična poruka uz paket · +
+                      {formatKM(Number(settings.gift_message_price ?? 0))} kada je popunjena
+                    </p>
+                  </div>
+                </div>
+                <Textarea
+                  value={giftMessage}
+                  onChange={(e) => setGiftMessage(e.target.value.slice(0, 500))}
+                  placeholder="Napišite poruku (ostavite prazno ako ne želite)"
+                  className="mt-3 min-h-[70px] rounded-xl bg-card text-sm"
+                />
+              </div>
+            )}
+
+
             <div className="rounded-3xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
               <h3 className="text-lg font-semibold">Pregled narudžbe</h3>
               {remainingForFreeShip > 0 && (
@@ -596,6 +654,12 @@ function HomePage() {
                 />
                 {totals.sameDayFee > 0 && (
                   <Row label="Same day print" value={formatKM(totals.sameDayFee)} muted />
+                )}
+                {totals.giftPackFee > 0 && (
+                  <Row label="Poklon pakovanje" value={formatKM(totals.giftPackFee)} muted />
+                )}
+                {totals.giftMsgFee > 0 && (
+                  <Row label="Poklon poruka" value={formatKM(totals.giftMsgFee)} muted />
                 )}
                 <div className="my-3 border-t border-border" />
                 <div className="flex items-baseline justify-between">

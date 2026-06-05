@@ -22,7 +22,7 @@ export function SiteHeader() {
             Podrška
           </a>
           <Link
-            to="/auth"
+            to="/prijava"
             className="text-muted-foreground transition-colors hover:text-foreground"
           >
             Admin

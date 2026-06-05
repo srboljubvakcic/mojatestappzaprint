@@ -9,21 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PrijavaRouteImport } from './routes/prijava'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as OrderIdRouteImport } from './routes/order.$id'
-import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminFormatsRouteImport } from './routes/admin.formats'
-import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
-import { Route as AdminOrdersIndexRouteImport } from './routes/admin.orders.index'
-import { Route as AdminOrdersIdRouteImport } from './routes/admin.orders.$id'
+import { Route as PorudzbinaIdRouteImport } from './routes/porudzbina.$id'
+import { Route as AdminTroskoviRouteImport } from './routes/admin.troskovi'
+import { Route as AdminPostavkeRouteImport } from './routes/admin.postavke'
+import { Route as AdminFormatiRouteImport } from './routes/admin.formati'
+import { Route as AdminPorudzbineIndexRouteImport } from './routes/admin.porudzbine.index'
+import { Route as AdminPorudzbineIdRouteImport } from './routes/admin.porudzbine.$id'
 import { Route as ApiPublicHooksCleanupImagesRouteImport } from './routes/api/public/hooks/cleanup-images'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const PrijavaRoute = PrijavaRouteImport.update({
+  id: '/prijava',
+  path: '/prijava',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -41,34 +41,34 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const OrderIdRoute = OrderIdRouteImport.update({
-  id: '/order/$id',
-  path: '/order/$id',
+const PorudzbinaIdRoute = PorudzbinaIdRouteImport.update({
+  id: '/porudzbina/$id',
+  path: '/porudzbina/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AdminTroskoviRoute = AdminTroskoviRouteImport.update({
+  id: '/troskovi',
+  path: '/troskovi',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminFormatsRoute = AdminFormatsRouteImport.update({
-  id: '/formats',
-  path: '/formats',
+const AdminPostavkeRoute = AdminPostavkeRouteImport.update({
+  id: '/postavke',
+  path: '/postavke',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminExpensesRoute = AdminExpensesRouteImport.update({
-  id: '/expenses',
-  path: '/expenses',
+const AdminFormatiRoute = AdminFormatiRouteImport.update({
+  id: '/formati',
+  path: '/formati',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
-  id: '/orders/',
-  path: '/orders/',
+const AdminPorudzbineIndexRoute = AdminPorudzbineIndexRouteImport.update({
+  id: '/porudzbine/',
+  path: '/porudzbine/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminOrdersIdRoute = AdminOrdersIdRouteImport.update({
-  id: '/orders/$id',
-  path: '/orders/$id',
+const AdminPorudzbineIdRoute = AdminPorudzbineIdRouteImport.update({
+  id: '/porudzbine/$id',
+  path: '/porudzbine/$id',
   getParentRoute: () => AdminRoute,
 } as any)
 const ApiPublicHooksCleanupImagesRoute =
@@ -81,40 +81,40 @@ const ApiPublicHooksCleanupImagesRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/admin/expenses': typeof AdminExpensesRoute
-  '/admin/formats': typeof AdminFormatsRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/order/$id': typeof OrderIdRoute
+  '/prijava': typeof PrijavaRoute
+  '/admin/formati': typeof AdminFormatiRoute
+  '/admin/postavke': typeof AdminPostavkeRoute
+  '/admin/troskovi': typeof AdminTroskoviRoute
+  '/porudzbina/$id': typeof PorudzbinaIdRoute
   '/admin/': typeof AdminIndexRoute
-  '/admin/orders/$id': typeof AdminOrdersIdRoute
-  '/admin/orders/': typeof AdminOrdersIndexRoute
+  '/admin/porudzbine/$id': typeof AdminPorudzbineIdRoute
+  '/admin/porudzbine/': typeof AdminPorudzbineIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/admin/expenses': typeof AdminExpensesRoute
-  '/admin/formats': typeof AdminFormatsRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/order/$id': typeof OrderIdRoute
+  '/prijava': typeof PrijavaRoute
+  '/admin/formati': typeof AdminFormatiRoute
+  '/admin/postavke': typeof AdminPostavkeRoute
+  '/admin/troskovi': typeof AdminTroskoviRoute
+  '/porudzbina/$id': typeof PorudzbinaIdRoute
   '/admin': typeof AdminIndexRoute
-  '/admin/orders/$id': typeof AdminOrdersIdRoute
-  '/admin/orders': typeof AdminOrdersIndexRoute
+  '/admin/porudzbine/$id': typeof AdminPorudzbineIdRoute
+  '/admin/porudzbine': typeof AdminPorudzbineIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/admin/expenses': typeof AdminExpensesRoute
-  '/admin/formats': typeof AdminFormatsRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/order/$id': typeof OrderIdRoute
+  '/prijava': typeof PrijavaRoute
+  '/admin/formati': typeof AdminFormatiRoute
+  '/admin/postavke': typeof AdminPostavkeRoute
+  '/admin/troskovi': typeof AdminTroskoviRoute
+  '/porudzbina/$id': typeof PorudzbinaIdRoute
   '/admin/': typeof AdminIndexRoute
-  '/admin/orders/$id': typeof AdminOrdersIdRoute
-  '/admin/orders/': typeof AdminOrdersIndexRoute
+  '/admin/porudzbine/$id': typeof AdminPorudzbineIdRoute
+  '/admin/porudzbine/': typeof AdminPorudzbineIndexRoute
   '/api/public/hooks/cleanup-images': typeof ApiPublicHooksCleanupImagesRoute
 }
 export interface FileRouteTypes {
@@ -122,57 +122,57 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/auth'
-    | '/admin/expenses'
-    | '/admin/formats'
-    | '/admin/settings'
-    | '/order/$id'
+    | '/prijava'
+    | '/admin/formati'
+    | '/admin/postavke'
+    | '/admin/troskovi'
+    | '/porudzbina/$id'
     | '/admin/'
-    | '/admin/orders/$id'
-    | '/admin/orders/'
+    | '/admin/porudzbine/$id'
+    | '/admin/porudzbine/'
     | '/api/public/hooks/cleanup-images'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
-    | '/admin/expenses'
-    | '/admin/formats'
-    | '/admin/settings'
-    | '/order/$id'
+    | '/prijava'
+    | '/admin/formati'
+    | '/admin/postavke'
+    | '/admin/troskovi'
+    | '/porudzbina/$id'
     | '/admin'
-    | '/admin/orders/$id'
-    | '/admin/orders'
+    | '/admin/porudzbine/$id'
+    | '/admin/porudzbine'
     | '/api/public/hooks/cleanup-images'
   id:
     | '__root__'
     | '/'
     | '/admin'
-    | '/auth'
-    | '/admin/expenses'
-    | '/admin/formats'
-    | '/admin/settings'
-    | '/order/$id'
+    | '/prijava'
+    | '/admin/formati'
+    | '/admin/postavke'
+    | '/admin/troskovi'
+    | '/porudzbina/$id'
     | '/admin/'
-    | '/admin/orders/$id'
-    | '/admin/orders/'
+    | '/admin/porudzbine/$id'
+    | '/admin/porudzbine/'
     | '/api/public/hooks/cleanup-images'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
-  AuthRoute: typeof AuthRoute
-  OrderIdRoute: typeof OrderIdRoute
+  PrijavaRoute: typeof PrijavaRoute
+  PorudzbinaIdRoute: typeof PorudzbinaIdRoute
   ApiPublicHooksCleanupImagesRoute: typeof ApiPublicHooksCleanupImagesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/prijava': {
+      id: '/prijava'
+      path: '/prijava'
+      fullPath: '/prijava'
+      preLoaderRoute: typeof PrijavaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -196,46 +196,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/order/$id': {
-      id: '/order/$id'
-      path: '/order/$id'
-      fullPath: '/order/$id'
-      preLoaderRoute: typeof OrderIdRouteImport
+    '/porudzbina/$id': {
+      id: '/porudzbina/$id'
+      path: '/porudzbina/$id'
+      fullPath: '/porudzbina/$id'
+      preLoaderRoute: typeof PorudzbinaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
+    '/admin/troskovi': {
+      id: '/admin/troskovi'
+      path: '/troskovi'
+      fullPath: '/admin/troskovi'
+      preLoaderRoute: typeof AdminTroskoviRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/formats': {
-      id: '/admin/formats'
-      path: '/formats'
-      fullPath: '/admin/formats'
-      preLoaderRoute: typeof AdminFormatsRouteImport
+    '/admin/postavke': {
+      id: '/admin/postavke'
+      path: '/postavke'
+      fullPath: '/admin/postavke'
+      preLoaderRoute: typeof AdminPostavkeRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/expenses': {
-      id: '/admin/expenses'
-      path: '/expenses'
-      fullPath: '/admin/expenses'
-      preLoaderRoute: typeof AdminExpensesRouteImport
+    '/admin/formati': {
+      id: '/admin/formati'
+      path: '/formati'
+      fullPath: '/admin/formati'
+      preLoaderRoute: typeof AdminFormatiRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/orders/': {
-      id: '/admin/orders/'
-      path: '/orders'
-      fullPath: '/admin/orders/'
-      preLoaderRoute: typeof AdminOrdersIndexRouteImport
+    '/admin/porudzbine/': {
+      id: '/admin/porudzbine/'
+      path: '/porudzbine'
+      fullPath: '/admin/porudzbine/'
+      preLoaderRoute: typeof AdminPorudzbineIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/orders/$id': {
-      id: '/admin/orders/$id'
-      path: '/orders/$id'
-      fullPath: '/admin/orders/$id'
-      preLoaderRoute: typeof AdminOrdersIdRouteImport
+    '/admin/porudzbine/$id': {
+      id: '/admin/porudzbine/$id'
+      path: '/porudzbine/$id'
+      fullPath: '/admin/porudzbine/$id'
+      preLoaderRoute: typeof AdminPorudzbineIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/api/public/hooks/cleanup-images': {
@@ -249,21 +249,21 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
-  AdminExpensesRoute: typeof AdminExpensesRoute
-  AdminFormatsRoute: typeof AdminFormatsRoute
-  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminFormatiRoute: typeof AdminFormatiRoute
+  AdminPostavkeRoute: typeof AdminPostavkeRoute
+  AdminTroskoviRoute: typeof AdminTroskoviRoute
   AdminIndexRoute: typeof AdminIndexRoute
-  AdminOrdersIdRoute: typeof AdminOrdersIdRoute
-  AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
+  AdminPorudzbineIdRoute: typeof AdminPorudzbineIdRoute
+  AdminPorudzbineIndexRoute: typeof AdminPorudzbineIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminExpensesRoute: AdminExpensesRoute,
-  AdminFormatsRoute: AdminFormatsRoute,
-  AdminSettingsRoute: AdminSettingsRoute,
+  AdminFormatiRoute: AdminFormatiRoute,
+  AdminPostavkeRoute: AdminPostavkeRoute,
+  AdminTroskoviRoute: AdminTroskoviRoute,
   AdminIndexRoute: AdminIndexRoute,
-  AdminOrdersIdRoute: AdminOrdersIdRoute,
-  AdminOrdersIndexRoute: AdminOrdersIndexRoute,
+  AdminPorudzbineIdRoute: AdminPorudzbineIdRoute,
+  AdminPorudzbineIndexRoute: AdminPorudzbineIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -271,8 +271,8 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
-  AuthRoute: AuthRoute,
-  OrderIdRoute: OrderIdRoute,
+  PrijavaRoute: PrijavaRoute,
+  PorudzbinaIdRoute: PorudzbinaIdRoute,
   ApiPublicHooksCleanupImagesRoute: ApiPublicHooksCleanupImagesRoute,
 }
 export const routeTree = rootRouteImport

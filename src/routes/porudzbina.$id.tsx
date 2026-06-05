@@ -9,7 +9,7 @@ import { getOrderConfirmation } from "@/lib/api/orders.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/order/$id")({
+export const Route = createFileRoute("/porudzbina/$id")({
   validateSearch: z.object({ total: z.number().optional() }),
   head: () => ({
     meta: [{ title: "Hvala na narudžbi — FotoPrint BiH" }],

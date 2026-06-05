@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export const Route = createFileRoute("/admin/expenses")({
+export const Route = createFileRoute("/admin/troskovi")({
   component: ExpensesPage,
 });
 

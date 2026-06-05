@@ -54,6 +54,8 @@ export const submitOrder = createServerFn({ method: "POST" })
     z.object({
       orderRef: z.string().uuid(),
       same_day: z.boolean().default(false),
+      gift_packaging: z.boolean().default(false),
+      gift_message: z.string().trim().max(500).optional().nullable(),
       customer: z.object({
         full_name: z.string().trim().min(2).max(120),
         phone: z.string().trim().min(5).max(40),
@@ -139,14 +141,24 @@ export const submitOrder = createServerFn({ method: "POST" })
       });
     }
 
-    // Shipping + same day
+    // Shipping + same day + gift packaging
     const freeShip =
       !!settings?.free_shipping_enabled &&
       subtotal >= Number(settings?.free_shipping_threshold ?? 0);
     const shipping_fee = freeShip ? 0 : Number(settings?.shipping_fee ?? 0);
     const same_day = data.same_day && !!settings?.same_day_enabled;
     const same_day_fee = same_day ? Number(settings?.same_day_price ?? 0) : 0;
-    const total = subtotal + shipping_fee + same_day_fee;
+    const gift_packaging = data.gift_packaging && !!settings?.gift_packaging_enabled;
+    const gift_packaging_fee = gift_packaging
+      ? Number(settings?.gift_packaging_price ?? 0)
+      : 0;
+    const giftMsgText = data.gift_message?.trim() || "";
+    const hasGiftMessage = !!giftMsgText && !!settings?.gift_message_enabled;
+    const gift_message_fee = hasGiftMessage
+      ? Number(settings?.gift_message_price ?? 0)
+      : 0;
+    const total =
+      subtotal + shipping_fee + same_day_fee + gift_packaging_fee + gift_message_fee;
 
     const { data: order, error: oErr } = await supabaseAdmin
       .from("orders")
@@ -163,6 +175,10 @@ export const submitOrder = createServerFn({ method: "POST" })
         shipping_fee: Number(shipping_fee.toFixed(2)),
         same_day,
         same_day_fee: Number(same_day_fee.toFixed(2)),
+        gift_packaging,
+        gift_packaging_fee: Number(gift_packaging_fee.toFixed(2)),
+        gift_message: hasGiftMessage ? giftMsgText : null,
+        gift_message_fee: Number(gift_message_fee.toFixed(2)),
         status: "pending",
       })
       .select("id, order_number")

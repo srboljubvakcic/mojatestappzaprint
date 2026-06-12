@@ -1,5 +1,18 @@
 {
   "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "eslint.config.js"],
+  "exclude": [
+    "src/routes/**",
+    "src/routeTree.gen.ts",
+    "src/router.tsx",
+    "src/server.ts",
+    "src/start.ts",
+    "src/lib/api/**",
+    "src/lib/**/*.server.ts",
+    "src/integrations/supabase/auth-attacher.ts",
+    "src/integrations/supabase/auth-middleware.ts",
+    "src/integrations/supabase/client.server.ts",
+    "src/components/site-chrome.tsx"
+  ],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",

@@ -159,7 +159,7 @@ export async function adminGetSettings() {
 }
 
 export async function adminUpdateSettings(arg: { data: Record<string, any> }) {
-  const { error } = await supabase.from("app_settings").update(arg.data).eq("id", 1);
+  const { error } = await supabase.from("app_settings").update(arg.data as any).eq("id", 1);
   if (error) throw new Error(error.message);
   return { ok: true };
 }
@@ -275,7 +275,7 @@ export async function adminUpdateOrderStatus(arg: {
 
 export async function adminUpdateOrder(arg: { data: { id: string } & Record<string, any> }) {
   const { id, ...payload } = arg.data;
-  const { error } = await supabase.from("orders").update(payload).eq("id", id);
+  const { error } = await supabase.from("orders").update(payload as any).eq("id", id);
   if (error) throw new Error(error.message);
   return { ok: true };
 }

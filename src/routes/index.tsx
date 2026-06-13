@@ -19,8 +19,7 @@ import {
   Gift,
 } from "lucide-react";
 
-import { listActiveFormats, getPublicSettings } from "@/lib/api/formats.functions";
-import { createSignedUploads, submitOrder } from "@/lib/api/orders.functions";
+import { listActiveFormats, getPublicSettings, submitOrder } from "@/lib/app-api";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKM } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -98,7 +97,7 @@ function HomePage() {
   const gifts = formats.filter((f: any) => f.category === "gift");
   const defaultFormatId = prints[0]?.id ?? "";
 
-  const createSignedUploadsFn = useServerFn(createSignedUploads);
+  const createSignedUploadsFn = async (_opts: any) => ({ uploads: [] });
   const submitOrderFn = useServerFn(submitOrder);
 
   const onDrop = useCallback(
@@ -108,6 +107,8 @@ function HomePage() {
         toast.error("Formati još nisu učitani.");
         return;
       }
+      const ext = (n: string) =>
+        (n.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
       const locals: UploadedImage[] = accepted.map((f) => ({
         id: crypto.randomUUID(),
         previewUrl: URL.createObjectURL(f),
@@ -119,40 +120,28 @@ function HomePage() {
       }));
       setImages((prev) => [...prev, ...locals]);
 
-      try {
-        const { uploads } = await createSignedUploadsFn({
-          data: {
-            orderRef: orderRef.current,
-            files: accepted.map((f) => ({ name: f.name, size: f.size })),
-          },
-        });
-
-        await Promise.all(
-          accepted.map(async (file, idx) => {
-            const local = locals[idx];
-            const u = uploads[idx];
-            const { error } = await supabase.storage
-              .from("order-images")
-              .uploadToSignedUrl(u.path, u.token, file, {
-                contentType: file.type || "image/jpeg",
-                upsert: false,
-              });
-            setImages((prev) =>
-              prev.map((img) =>
-                img.id === local.id
-                  ? { ...img, uploading: false, storagePath: error ? null : u.path }
-                  : img,
-              ),
-            );
-            if (error) toast.error(`Greška kod otpremanja: ${file.name}`);
-          }),
-        );
-      } catch (e: any) {
-        toast.error(e?.message ?? "Greška kod otpremanja");
-        setImages((prev) => prev.filter((i) => !locals.find((l) => l.id === i.id)));
-      }
+      await Promise.all(
+        accepted.map(async (file, idx) => {
+          const local = locals[idx];
+          const path = `${orderRef.current}/${crypto.randomUUID()}.${ext(file.name)}`;
+          const { error } = await supabase.storage
+            .from("order-images")
+            .upload(path, file, {
+              contentType: file.type || "image/jpeg",
+              upsert: false,
+            });
+          setImages((prev) =>
+            prev.map((img) =>
+              img.id === local.id
+                ? { ...img, uploading: false, storagePath: error ? null : path }
+                : img,
+            ),
+          );
+          if (error) toast.error(`Greška kod otpremanja: ${file.name}`);
+        }),
+      );
     },
-    [createSignedUploadsFn, defaultFormatId],
+    [defaultFormatId],
   );
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({

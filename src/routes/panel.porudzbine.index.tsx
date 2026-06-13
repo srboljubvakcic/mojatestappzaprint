@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { ChevronRight, Zap } from "lucide-react";
 
-import { adminListOrders } from "@/lib/api/orders.functions";
+import { adminListOrders } from "@/lib/app-api";
 import { formatKM, formatOrderNo } from "@/lib/format";
 import { STATUS_LABEL, STATUS_ORDER, STATUS_STYLES } from "@/components/order-status";
 

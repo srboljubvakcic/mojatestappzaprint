@@ -9,7 +9,7 @@ import {
   adminListAllFormats,
   adminUpsertFormat,
   adminDeleteFormat,
-} from "@/lib/api/formats.functions";
+} from "@/lib/app-api";
 import { formatKM, CATEGORY_LABEL } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -5,7 +5,7 @@ import { CheckCircle2, Package, MapPin, Phone, Mail, User } from "lucide-react";
 import { z } from "zod";
 
 import { formatKM, formatOrderNo } from "@/lib/format";
-import { getOrderConfirmation } from "@/lib/api/orders.functions";
+import { getOrderConfirmation } from "@/lib/app-api";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { Button } from "@/components/ui/button";
 

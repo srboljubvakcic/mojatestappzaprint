@@ -1,17 +1,19 @@
 {
   "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts", "eslint.config.js"],
   "exclude": [
-    "src/routes/**",
     "src/routeTree.gen.ts",
     "src/router.tsx",
     "src/server.ts",
     "src/start.ts",
+    "src/routes/__root.tsx",
+    "src/routes/api/**",
     "src/lib/api/**",
     "src/lib/**/*.server.ts",
+    "src/lib/error-capture.ts",
+    "src/lib/error-page.ts",
     "src/integrations/supabase/auth-attacher.ts",
     "src/integrations/supabase/auth-middleware.ts",
-    "src/integrations/supabase/client.server.ts",
-    "src/components/site-chrome.tsx"
+    "src/integrations/supabase/client.server.ts"
   ],
   "compilerOptions": {
     "target": "ES2022",
@@ -19,14 +21,10 @@
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
-
-    /* Bundler mode */
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": false,
     "noEmit": true,
-
-    /* Linting */
     "skipLibCheck": true,
     "strict": true,
     "noUnusedLocals": false,
@@ -34,7 +32,9 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@tanstack/react-router": ["./src/compat/tanstack-router.tsx"],
+      "@tanstack/react-start": ["./src/compat/tanstack-start.ts"]
     }
   }
 }

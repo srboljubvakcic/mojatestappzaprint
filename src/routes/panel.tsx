@@ -21,7 +21,7 @@ import {
 
 
 import { supabase } from "@/integrations/supabase/client";
-import { checkIsAdmin } from "@/lib/api/formats.functions";
+import { checkIsAdmin } from "@/lib/app-api";
 
 export const Route = createFileRoute("/panel")({
   ssr: false,

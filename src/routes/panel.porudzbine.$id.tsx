@@ -11,7 +11,7 @@ import {
   adminUpdateOrderStatus,
   adminDeleteImage,
   adminUpdateOrder,
-} from "@/lib/api/orders.functions";
+} from "@/lib/app-api";
 import { formatKM, formatOrderNo } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

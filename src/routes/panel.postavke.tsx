@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   adminGetSettings,
   adminUpdateSettings,
-} from "@/lib/api/formats.functions";
+} from "@/lib/app-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

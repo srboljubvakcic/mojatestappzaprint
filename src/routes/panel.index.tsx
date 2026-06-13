@@ -29,7 +29,7 @@ import {
   adminDashboardStats,
   adminRecentOrders,
   adminReports,
-} from "@/lib/api/orders.functions";
+} from "@/lib/app-api";
 import { formatKM, formatOrderNo } from "@/lib/format";
 import { STATUS_LABEL, STATUS_STYLES } from "@/components/order-status";
 

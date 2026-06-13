@@ -21,7 +21,7 @@ import {
   Activity,
 } from "lucide-react";
 
-import { adminReports } from "@/lib/api/orders.functions";
+import { adminReports } from "@/lib/app-api";
 import { formatKM } from "@/lib/format";
 import { STATUS_LABEL } from "@/components/order-status";
 

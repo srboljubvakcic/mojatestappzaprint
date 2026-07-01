@@ -81,6 +81,32 @@ function SettingsPage() {
       </p>
 
       <div className="mt-6 max-w-2xl space-y-5">
+        <Card icon={<MessageCircle className="h-4 w-4" />} title="Dugme podrške (WhatsApp)">
+          <div className="flex items-center justify-between rounded-xl bg-secondary px-4 py-3">
+            <div>
+              <Label className="cursor-pointer">Prikaži dugme "Podrška" u zaglavlju</Label>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Otvara WhatsApp chat na broj ispod
+              </p>
+            </div>
+            <Switch
+              checked={form.support_enabled}
+              onCheckedChange={(v) => setForm({ ...form, support_enabled: v })}
+            />
+          </div>
+          <div>
+            <Label>Broj telefona (WhatsApp)</Label>
+            <Input
+              type="tel"
+              value={form.support_phone}
+              onChange={(e) => setForm({ ...form, support_phone: e.target.value })}
+              className="mt-1.5"
+              placeholder="+387 60 000 0000"
+              disabled={!form.support_enabled}
+            />
+          </div>
+        </Card>
+
         <Card icon={<Truck className="h-4 w-4" />} title="Dostava">
           <div className="flex items-center justify-between rounded-xl bg-secondary px-4 py-3">
             <div>

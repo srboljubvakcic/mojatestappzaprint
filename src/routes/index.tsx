@@ -315,12 +315,6 @@ function HomePage() {
                 <ImagePlus className="mr-2 h-4 w-4" />
                 Otpremi fotografije
               </Button>
-              <a
-                href="#proizvodi"
-                className="rounded-full border border-border/80 bg-card/70 px-5 py-2.5 text-sm font-medium text-foreground/80 backdrop-blur transition-colors hover:bg-card"
-              >
-                Pogledaj formate →
-              </a>
             </div>
           </div>
 
@@ -530,7 +524,7 @@ function HomePage() {
                     setCustomer({ ...customer, full_name: e.target.value })
                   }
                   className="mt-1.5"
-                  placeholder="Adis Hodžić"
+                  placeholder="Ime i prezime"
                 />
               </div>
               <div>
@@ -540,7 +534,7 @@ function HomePage() {
                   value={customer.phone}
                   onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
                   className="mt-1.5"
-                  placeholder="+387 60 000 000"
+                  placeholder="Telefon"
                 />
               </div>
               <div>
@@ -551,7 +545,7 @@ function HomePage() {
                   value={customer.email}
                   onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
                   className="mt-1.5"
-                  placeholder="ime@example.com"
+                  placeholder="Email"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -561,7 +555,7 @@ function HomePage() {
                   value={customer.address}
                   onChange={(e) => setCustomer({ ...customer, address: e.target.value })}
                   className="mt-1.5"
-                  placeholder="Ulica i broj"
+                  placeholder="Adresa"
                 />
               </div>
               <div>
@@ -571,7 +565,7 @@ function HomePage() {
                   value={customer.city}
                   onChange={(e) => setCustomer({ ...customer, city: e.target.value })}
                   className="mt-1.5"
-                  placeholder="Sarajevo"
+                  placeholder="Grad"
                 />
               </div>
               <div>
@@ -583,7 +577,7 @@ function HomePage() {
                     setCustomer({ ...customer, postal_code: e.target.value })
                   }
                   className="mt-1.5"
-                  placeholder="71000"
+                  placeholder="Poštanski broj"
                 />
               </div>
               <div className="sm:col-span-2">

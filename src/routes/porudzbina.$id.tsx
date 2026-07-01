@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/porudzbina/$id")({
   validateSearch: z.object({ total: z.number().optional() }),
   head: () => ({
-    meta: [{ title: "Hvala na narudžbi — FotoPrint BiH" }],
+    meta: [{ title: "Hvala na narudžbi — Izrada.Online" }],
   }),
   component: OrderConfirmation,
 });

@@ -82,7 +82,7 @@ function AdminLayout() {
               <Camera className="h-4 w-4" />
             </span>
             <div>
-              <div className="text-sm font-semibold tracking-tight">FotoPrint BiH</div>
+              <div className="text-sm font-semibold tracking-tight">Izrada.Online</div>
               <div className="text-[11px] text-muted-foreground">Kontrolni panel</div>
             </div>
           </Link>

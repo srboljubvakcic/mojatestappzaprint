@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/prijava")({
-  head: () => ({ meta: [{ title: "Admin prijava — FotoPrint BiH" }] }),
+  head: () => ({ meta: [{ title: "Admin prijava — Izrada.Online" }] }),
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();
@@ -60,7 +60,7 @@ function AuthPage() {
           {mode === "signin" ? "Admin prijava" : "Kreiraj nalog"}
         </h1>
         <p className="mt-1 text-center text-sm text-muted-foreground">
-          Pristup kontrolnom panelu FotoPrint BiH
+          Pristup kontrolnom panelu Izrada.Online
         </p>
 
         <form onSubmit={handle} className="mt-6 space-y-4">

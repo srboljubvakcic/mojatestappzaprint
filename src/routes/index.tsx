@@ -39,7 +39,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FotoPrint BiH — Štampajte fotografije online" },
+      { title: "Izrada.Online — Štampajte fotografije online" },
       {
         name: "description",
         content:

@@ -26,6 +26,8 @@ export type Database = {
           same_day_enabled: boolean
           same_day_price: number
           shipping_fee: number
+          support_enabled: boolean
+          support_phone: string
           updated_at: string
         }
         Insert: {
@@ -39,6 +41,8 @@ export type Database = {
           same_day_enabled?: boolean
           same_day_price?: number
           shipping_fee?: number
+          support_enabled?: boolean
+          support_phone?: string
           updated_at?: string
         }
         Update: {
@@ -52,6 +56,8 @@ export type Database = {
           same_day_enabled?: boolean
           same_day_price?: number
           shipping_fee?: number
+          support_enabled?: boolean
+          support_phone?: string
           updated_at?: string
         }
         Relationships: []

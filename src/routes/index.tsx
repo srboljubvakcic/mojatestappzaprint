@@ -315,12 +315,6 @@ function HomePage() {
                 <ImagePlus className="mr-2 h-4 w-4" />
                 Otpremi fotografije
               </Button>
-              <a
-                href="#proizvodi"
-                className="rounded-full border border-border/80 bg-card/70 px-5 py-2.5 text-sm font-medium text-foreground/80 backdrop-blur transition-colors hover:bg-card"
-              >
-                Pogledaj formate →
-              </a>
             </div>
           </div>
 

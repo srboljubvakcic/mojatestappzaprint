@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Truck, Zap, Save, Gift, MessageSquareHeart } from "lucide-react";
+import { Truck, Zap, Save, Gift, MessageSquareHeart, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -37,6 +37,8 @@ function SettingsPage() {
     gift_packaging_price: 3,
     gift_message_enabled: false,
     gift_message_price: 1,
+    support_enabled: true,
+    support_phone: "+387 60 000 0000",
   });
 
   useEffect(() => {
@@ -51,6 +53,8 @@ function SettingsPage() {
         gift_packaging_price: Number(data.settings.gift_packaging_price ?? 3),
         gift_message_enabled: !!data.settings.gift_message_enabled,
         gift_message_price: Number(data.settings.gift_message_price ?? 1),
+        support_enabled: data.settings.support_enabled ?? true,
+        support_phone: data.settings.support_phone ?? "+387 60 000 0000",
       });
     }
   }, [data]);

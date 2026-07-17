@@ -749,7 +749,9 @@ function HomePage() {
                   Dodajte još {formatKM(remainingForFreeShip)} za{" "}
                   <strong>besplatnu dostavu</strong>
                 </div>
+              )}
               {totals.vdEnabled && totals.qty > 0 && totals.qty < totals.vdThreshold && totals.vdPercent > 0 && (
+
                 <div className="mt-2 rounded-xl bg-success/10 px-3 py-2 text-xs text-success-foreground">
                   Dodajte još {totals.vdThreshold - totals.qty} fotografija za{" "}
                   <strong>{totals.vdPercent}% popusta</strong>

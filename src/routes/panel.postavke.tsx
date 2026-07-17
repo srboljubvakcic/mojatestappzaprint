@@ -39,6 +39,9 @@ function SettingsPage() {
     gift_message_price: 1,
     support_enabled: true,
     support_phone: "+387 60 000 0000",
+    volume_discount_enabled: false,
+    volume_discount_threshold: 50,
+    volume_discount_percent: 10,
   });
 
   useEffect(() => {
@@ -55,9 +58,13 @@ function SettingsPage() {
         gift_message_price: Number(data.settings.gift_message_price ?? 1),
         support_enabled: data.settings.support_enabled ?? true,
         support_phone: data.settings.support_phone ?? "+387 60 000 0000",
+        volume_discount_enabled: !!data.settings.volume_discount_enabled,
+        volume_discount_threshold: Number(data.settings.volume_discount_threshold ?? 50),
+        volume_discount_percent: Number(data.settings.volume_discount_percent ?? 10),
       });
     }
   }, [data]);
+
 
   const saveMut = useMutation({
     mutationFn: () => updateFn({ data: form }),

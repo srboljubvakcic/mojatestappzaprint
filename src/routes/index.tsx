@@ -745,14 +745,14 @@ function HomePage() {
             <div className="rounded-3xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
               <h3 className="text-lg font-semibold">Pregled narudžbe</h3>
               {remainingForFreeShip > 0 && (
-                <div className="mt-3 rounded-xl bg-primary/5 px-3 py-2 text-xs text-primary">
+                <div className="mt-3 rounded-xl bg-primary/5 px-3 py-2 text-xs text-base font-medium">
                   Dodajte još {formatKM(remainingForFreeShip)} za{" "}
                   <strong>besplatnu dostavu</strong>
                 </div>
               )}
               {totals.vdEnabled && totals.qty > 0 && totals.qty < totals.vdThreshold && totals.vdPercent > 0 && (
 
-                <div className="mt-2 rounded-xl bg-primary/5 px-3 py-2 text-xs text-base">
+                <div className="mt-2 rounded-xl bg-primary/5 px-3 py-2 text-xs text-base font-medium">
                   Dodajte još {totals.vdThreshold - totals.qty} fotografija za{" "}
                   <strong>{totals.vdPercent}% popusta</strong>
                 </div>

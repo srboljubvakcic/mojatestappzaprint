@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Truck, Zap, Save, Gift, MessageSquareHeart, MessageCircle } from "lucide-react";
+import { Truck, Zap, Save, Gift, MessageSquareHeart, MessageCircle, Percent } from "lucide-react";
 import { toast } from "sonner";
 
 import {

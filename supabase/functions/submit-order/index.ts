@@ -36,7 +36,10 @@ Deno.serve(async (req) => {
     if (!isUuid(orderRef)) throw new Error("Neispravan orderRef.");
     if (!customer || typeof customer !== "object") throw new Error("Nedostaju podaci kupca.");
     if (!Array.isArray(items) || items.length === 0) throw new Error("Nedostaju stavke narudžbe.");
-    if (items.length > 500) throw new Error("Previše stavki.");
+    if (items.length > 200) throw new Error("Previše stavki.");
+    const photoItemsCount = items.filter((it: any) => it && it.storage_path).length;
+    if (photoItemsCount > 100) throw new Error("Maksimalno 100 fotografija po narudžbi.");
+
 
     const required = ["full_name", "phone", "address", "city"] as const;
     for (const k of required) {

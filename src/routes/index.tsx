@@ -100,6 +100,9 @@ function HomePage() {
   const createSignedUploadsFn = async (_opts: any) => ({ uploads: [] });
   const submitOrderFn = useServerFn(submitOrder);
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+  const MAX_FILES = 100;
+
   const onDrop = useCallback(
     async (accepted: File[]) => {
       if (!accepted.length) return;
@@ -107,9 +110,32 @@ function HomePage() {
         toast.error("Formati još nisu učitani.");
         return;
       }
+      // Enforce max total count
+      const remaining = MAX_FILES - images.length;
+      if (remaining <= 0) {
+        toast.error(`Maksimalno ${MAX_FILES} fotografija po narudžbi.`);
+        return;
+      }
+      let toProcess = accepted;
+      if (accepted.length > remaining) {
+        toast.error(
+          `Maksimalno ${MAX_FILES} fotografija — prihvaćeno prvih ${remaining}.`,
+        );
+        toProcess = accepted.slice(0, remaining);
+      }
+      // Enforce size (defense in depth; dropzone already filters)
+      const oversized = toProcess.filter((f) => f.size > MAX_FILE_SIZE);
+      if (oversized.length) {
+        toast.error(
+          `${oversized.length} fajl(ova) preko 10MB je odbijeno.`,
+        );
+      }
+      const valid = toProcess.filter((f) => f.size <= MAX_FILE_SIZE);
+      if (!valid.length) return;
+
       const ext = (n: string) =>
         (n.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-      const locals: UploadedImage[] = accepted.map((f) => ({
+      const locals: UploadedImage[] = valid.map((f) => ({
         id: crypto.randomUUID(),
         previewUrl: URL.createObjectURL(f),
         storagePath: null,
@@ -121,7 +147,7 @@ function HomePage() {
       setImages((prev) => [...prev, ...locals]);
 
       await Promise.all(
-        accepted.map(async (file, idx) => {
+        valid.map(async (file, idx) => {
           const local = locals[idx];
           const path = `${orderRef.current}/${crypto.randomUUID()}.${ext(file.name)}`;
           const { error } = await supabase.storage
@@ -141,17 +167,25 @@ function HomePage() {
         }),
       );
     },
-    [defaultFormatId],
+    [defaultFormatId, images.length],
   );
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: { "image/*": [] },
-    maxSize: 20 * 1024 * 1024,
-    maxFiles: 500,
+    maxSize: MAX_FILE_SIZE,
+    maxFiles: MAX_FILES,
     noClick: true,
     noKeyboard: true,
+    onDropRejected: (rejs) => {
+      const tooBig = rejs.some((r) => r.errors.some((e) => e.code === "file-too-large"));
+      if (tooBig) toast.error("Neke fotografije prelaze 10MB i nisu prihvaćene.");
+    },
   });
+
+  const applyFormatToAll = (formatId: string) => {
+    setImages((prev) => prev.map((i) => ({ ...i, formatId })));
+  };
 
   const updateImg = (id: string, patch: Partial<UploadedImage>) =>
     setImages((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));

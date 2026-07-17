@@ -745,7 +745,7 @@ function HomePage() {
             <div className="rounded-3xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
               <h3 className="text-lg font-semibold">Pregled narudžbe</h3>
               {remainingForFreeShip > 0 && (
-                <div className="mt-3 rounded-xl bg-primary/5 px-3 py-2 text-xs text-primary">
+                <div className="mt-3 rounded-xl bg-success/10 px-3 py-2 text-xs text-primary">
                   Dodajte još {formatKM(remainingForFreeShip)} za{" "}
                   <strong>besplatnu dostavu</strong>
                 </div>

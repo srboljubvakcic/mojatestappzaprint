@@ -65,7 +65,9 @@ Deno.serve(async (req) => {
 
     const formatMap = new Map((formats ?? []).map((f: any) => [f.id, f]));
 
-    let subtotal = 0;
+    let photoSubtotal = 0;
+    let extraSubtotal = 0;
+    let photoQty = 0;
     const orderItemRows: any[] = [];
     const imageRows: any[] = [];
     const imageIdByPath = new Map<string, string>();
@@ -75,11 +77,12 @@ Deno.serve(async (req) => {
       if (!fmt || !fmt.active) throw new Error("Neispravan format.");
       const qty = Math.max(1, Math.min(500, Number(item.quantity) || 1));
       const lineTotal = Number(fmt.price_km) * qty;
-      subtotal += lineTotal;
 
       let imageId: string | null = null;
       const path = item.storage_path as string | null;
       if (path) {
+        photoSubtotal += lineTotal;
+        photoQty += qty;
         imageId = imageIdByPath.get(path) ?? crypto.randomUUID();
         if (!imageIdByPath.has(path)) {
           imageIdByPath.set(path, imageId);
@@ -90,6 +93,8 @@ Deno.serve(async (req) => {
             status: "active",
           });
         }
+      } else {
+        extraSubtotal += lineTotal;
       }
 
       orderItemRows.push({
@@ -104,6 +109,16 @@ Deno.serve(async (req) => {
         notes: (item.notes ?? null) || null,
       });
     }
+
+    const vdEnabled = !!settings?.volume_discount_enabled;
+    const vdThreshold = Number(settings?.volume_discount_threshold ?? 0);
+    const vdPercent = Number(settings?.volume_discount_percent ?? 0);
+    const volume_discount_fee =
+      vdEnabled && photoQty >= vdThreshold && vdPercent > 0
+        ? photoSubtotal * (vdPercent / 100)
+        : 0;
+    const subtotal = photoSubtotal + extraSubtotal - volume_discount_fee;
+
 
     const freeShip =
       !!settings?.free_shipping_enabled &&

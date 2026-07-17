@@ -421,7 +421,7 @@ function HomePage() {
             Prevucite fotografije ovdje
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            ili kliknite dugme ispod · JPG, PNG, HEIC do 20MB · do 500 fotografija odjednom
+            ili kliknite dugme ispod · JPG, PNG, HEIC do 10MB · do 100 fotografija po narudžbi
           </p>
           <Button type="button" onClick={open} size="lg" className="mt-6 rounded-full px-6">
             <ImagePlus className="mr-2 h-4 w-4" />

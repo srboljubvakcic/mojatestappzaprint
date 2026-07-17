@@ -749,14 +749,27 @@ function HomePage() {
                   Dodajte još {formatKM(remainingForFreeShip)} za{" "}
                   <strong>besplatnu dostavu</strong>
                 </div>
+              {totals.vdEnabled && totals.qty > 0 && totals.qty < totals.vdThreshold && totals.vdPercent > 0 && (
+                <div className="mt-2 rounded-xl bg-success/10 px-3 py-2 text-xs text-success-foreground">
+                  Dodajte još {totals.vdThreshold - totals.qty} fotografija za{" "}
+                  <strong>{totals.vdPercent}% popusta</strong>
+                </div>
               )}
               <dl className="mt-4 space-y-2 text-sm">
                 <Row label={`Fotografije (${images.length})`} value={`${totals.qty} kopija`} muted />
                 {extras.length > 0 && (
                   <Row label="Dodatni proizvodi" value={`${extras.length} stavki`} muted />
                 )}
+                {totals.volumeDiscount > 0 && (
+                  <Row
+                    label={`Količinski popust (${totals.vdPercent}%)`}
+                    value={<span className="text-success">-{formatKM(totals.volumeDiscount)}</span>}
+                    muted
+                  />
+                )}
                 <div className="my-3 border-t border-border" />
                 <Row label="Međuzbir" value={formatKM(totals.subtotal)} muted />
+
                 <Row
                   label="Dostava"
                   value={

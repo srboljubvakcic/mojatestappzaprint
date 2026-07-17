@@ -151,6 +151,8 @@ Deno.serve(async (req) => {
       gift_packaging_fee: Number(gift_packaging_fee.toFixed(2)),
       gift_message: hasGiftMsg ? giftMsgText : null,
       gift_message_fee: Number(gift_message_fee.toFixed(2)),
+      volume_discount_fee: Number(volume_discount_fee.toFixed(2)),
+
       status: "pending",
     });
     if (oErr) throw new Error(oErr.message);

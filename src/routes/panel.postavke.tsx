@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
-import { Truck, Zap, Save, Gift, MessageSquareHeart, MessageCircle } from "lucide-react";
+import { Truck, Zap, Save, Gift, MessageSquareHeart, MessageCircle, Percent } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -39,6 +39,9 @@ function SettingsPage() {
     gift_message_price: 1,
     support_enabled: true,
     support_phone: "+387 60 000 0000",
+    volume_discount_enabled: false,
+    volume_discount_threshold: 50,
+    volume_discount_percent: 10,
   });
 
   useEffect(() => {
@@ -55,9 +58,13 @@ function SettingsPage() {
         gift_message_price: Number(data.settings.gift_message_price ?? 1),
         support_enabled: data.settings.support_enabled ?? true,
         support_phone: data.settings.support_phone ?? "+387 60 000 0000",
+        volume_discount_enabled: !!data.settings.volume_discount_enabled,
+        volume_discount_threshold: Number(data.settings.volume_discount_threshold ?? 50),
+        volume_discount_percent: Number(data.settings.volume_discount_percent ?? 10),
       });
     }
   }, [data]);
+
 
   const saveMut = useMutation({
     mutationFn: () => updateFn({ data: form }),
@@ -237,6 +244,53 @@ function SettingsPage() {
             />
           </div>
         </Card>
+
+        <Card icon={<Percent className="h-4 w-4" />} title="Količinski popust">
+          <div className="flex items-center justify-between rounded-xl bg-secondary px-4 py-3">
+            <div>
+              <Label className="cursor-pointer">Omogući popust na veći broj fotografija</Label>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Popust se automatski primjenjuje na cijenu fotografija kada količina pređe prag
+              </p>
+            </div>
+            <Switch
+              checked={form.volume_discount_enabled}
+              onCheckedChange={(v) => setForm({ ...form, volume_discount_enabled: v })}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Minimalna količina (kom)</Label>
+              <Input
+                type="number"
+                min="1"
+                step="1"
+                value={form.volume_discount_threshold}
+                onChange={(e) =>
+                  setForm({ ...form, volume_discount_threshold: Number(e.target.value) })
+                }
+                className="mt-1.5"
+                disabled={!form.volume_discount_enabled}
+              />
+            </div>
+            <div>
+              <Label>Popust (%)</Label>
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={form.volume_discount_percent}
+                onChange={(e) =>
+                  setForm({ ...form, volume_discount_percent: Number(e.target.value) })
+                }
+                className="mt-1.5"
+                disabled={!form.volume_discount_enabled}
+              />
+            </div>
+          </div>
+        </Card>
+
 
         <div className="flex justify-end">
           <Button

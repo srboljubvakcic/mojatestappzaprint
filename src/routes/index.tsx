@@ -100,6 +100,9 @@ function HomePage() {
   const createSignedUploadsFn = async (_opts: any) => ({ uploads: [] });
   const submitOrderFn = useServerFn(submitOrder);
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+  const MAX_FILES = 100;
+
   const onDrop = useCallback(
     async (accepted: File[]) => {
       if (!accepted.length) return;
@@ -107,9 +110,32 @@ function HomePage() {
         toast.error("Formati još nisu učitani.");
         return;
       }
+      // Enforce max total count
+      const remaining = MAX_FILES - images.length;
+      if (remaining <= 0) {
+        toast.error(`Maksimalno ${MAX_FILES} fotografija po narudžbi.`);
+        return;
+      }
+      let toProcess = accepted;
+      if (accepted.length > remaining) {
+        toast.error(
+          `Maksimalno ${MAX_FILES} fotografija — prihvaćeno prvih ${remaining}.`,
+        );
+        toProcess = accepted.slice(0, remaining);
+      }
+      // Enforce size (defense in depth; dropzone already filters)
+      const oversized = toProcess.filter((f) => f.size > MAX_FILE_SIZE);
+      if (oversized.length) {
+        toast.error(
+          `${oversized.length} fajl(ova) preko 10MB je odbijeno.`,
+        );
+      }
+      const valid = toProcess.filter((f) => f.size <= MAX_FILE_SIZE);
+      if (!valid.length) return;
+
       const ext = (n: string) =>
         (n.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-      const locals: UploadedImage[] = accepted.map((f) => ({
+      const locals: UploadedImage[] = valid.map((f) => ({
         id: crypto.randomUUID(),
         previewUrl: URL.createObjectURL(f),
         storagePath: null,
@@ -121,7 +147,7 @@ function HomePage() {
       setImages((prev) => [...prev, ...locals]);
 
       await Promise.all(
-        accepted.map(async (file, idx) => {
+        valid.map(async (file, idx) => {
           const local = locals[idx];
           const path = `${orderRef.current}/${crypto.randomUUID()}.${ext(file.name)}`;
           const { error } = await supabase.storage
@@ -141,17 +167,25 @@ function HomePage() {
         }),
       );
     },
-    [defaultFormatId],
+    [defaultFormatId, images.length],
   );
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: { "image/*": [] },
-    maxSize: 20 * 1024 * 1024,
-    maxFiles: 500,
+    maxSize: MAX_FILE_SIZE,
+    maxFiles: MAX_FILES,
     noClick: true,
     noKeyboard: true,
+    onDropRejected: (rejs) => {
+      const tooBig = rejs.some((r) => r.errors.some((e) => e.code === "file-too-large"));
+      if (tooBig) toast.error("Neke fotografije prelaze 10MB i nisu prihvaćene.");
+    },
   });
+
+  const applyFormatToAll = (formatId: string) => {
+    setImages((prev) => prev.map((i) => ({ ...i, formatId })));
+  };
 
   const updateImg = (id: string, patch: Partial<UploadedImage>) =>
     setImages((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
@@ -168,19 +202,29 @@ function HomePage() {
     setExtras((prev) => prev.filter((e) => e.id !== id));
 
   const totals = useMemo(() => {
-    let subtotal = 0;
+    let photoSubtotal = 0;
+    let extraSubtotal = 0;
     let qty = 0;
     for (const img of images) {
       const f = formats.find((f: any) => f.id === img.formatId);
       if (!f) continue;
-      subtotal += Number(f.price_km) * img.quantity;
+      photoSubtotal += Number(f.price_km) * img.quantity;
       qty += img.quantity;
     }
     for (const ex of extras) {
       const f = formats.find((f: any) => f.id === ex.formatId);
       if (!f) continue;
-      subtotal += Number(f.price_km) * ex.quantity;
+      extraSubtotal += Number(f.price_km) * ex.quantity;
     }
+    // Volume discount on photos only
+    const vdEnabled = !!settings?.volume_discount_enabled;
+    const vdThreshold = Number(settings?.volume_discount_threshold ?? 0);
+    const vdPercent = Number(settings?.volume_discount_percent ?? 0);
+    const volumeDiscount =
+      vdEnabled && qty >= vdThreshold && vdPercent > 0
+        ? photoSubtotal * (vdPercent / 100)
+        : 0;
+    const subtotal = photoSubtotal + extraSubtotal - volumeDiscount;
     const freeShip =
       !!settings?.free_shipping_enabled &&
       subtotal >= Number(settings?.free_shipping_threshold ?? 0);
@@ -196,7 +240,22 @@ function HomePage() {
         ? Number(settings.gift_message_price ?? 0)
         : 0;
     const total = subtotal + shipping + sameDayFee + giftPackFee + giftMsgFee;
-    return { subtotal, shipping, sameDayFee, giftPackFee, giftMsgFee, total, qty, freeShip };
+    return {
+      subtotal,
+      photoSubtotal,
+      extraSubtotal,
+      shipping,
+      sameDayFee,
+      giftPackFee,
+      giftMsgFee,
+      volumeDiscount,
+      vdEnabled,
+      vdThreshold,
+      vdPercent,
+      total,
+      qty,
+      freeShip,
+    };
   }, [images, extras, formats, settings, sameDay, giftPackaging, giftMessage]);
 
   const hasItems = images.length + extras.length > 0;
@@ -362,7 +421,7 @@ function HomePage() {
             Prevucite fotografije ovdje
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            ili kliknite dugme ispod · JPG, PNG, HEIC do 20MB · do 500 fotografija odjednom
+            ili kliknite dugme ispod · JPG, PNG, HEIC do 10MB · do 100 fotografija po narudžbi
           </p>
           <Button type="button" onClick={open} size="lg" className="mt-6 rounded-full px-6">
             <ImagePlus className="mr-2 h-4 w-4" />
@@ -374,18 +433,40 @@ function HomePage() {
       {/* Image grid */}
       {images.length > 0 && (
         <section className="mx-auto mt-10 max-w-6xl px-4 sm:px-6">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-lg font-semibold">
               Vaše fotografije ({images.length})
             </h3>
             <button
               type="button"
               onClick={() => setImages([])}
-              className="text-xs text-muted-foreground transition-colors hover:text-destructive"
+              className="self-start text-xs text-muted-foreground transition-colors hover:text-destructive sm:self-auto"
             >
               Ukloni sve
             </button>
           </div>
+          {/* Bulk format selector */}
+          <div className="mb-5 flex flex-col gap-2 rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] sm:flex-row sm:items-center sm:gap-3 sm:p-4">
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-medium">Format za sve fotografije</div>
+              <div className="text-xs text-muted-foreground">
+                Izaberite jednom — primjenjuje se na sve. Možete i pojedinačno mijenjati ispod.
+              </div>
+            </div>
+            <Select onValueChange={(v) => applyFormatToAll(v)}>
+              <SelectTrigger className="rounded-xl sm:w-64">
+                <SelectValue placeholder="Primijeni format na sve" />
+              </SelectTrigger>
+              <SelectContent>
+                {prints.map((f: any) => (
+                  <SelectItem key={f.id} value={f.id}>
+                    {f.name} — {formatKM(Number(f.price_km))}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {images.map((img) => (
               <div
@@ -669,13 +750,28 @@ function HomePage() {
                   <strong>besplatnu dostavu</strong>
                 </div>
               )}
+              {totals.vdEnabled && totals.qty > 0 && totals.qty < totals.vdThreshold && totals.vdPercent > 0 && (
+
+                <div className="mt-2 rounded-xl bg-success/10 px-3 py-2 text-xs text-success-foreground">
+                  Dodajte još {totals.vdThreshold - totals.qty} fotografija za{" "}
+                  <strong>{totals.vdPercent}% popusta</strong>
+                </div>
+              )}
               <dl className="mt-4 space-y-2 text-sm">
                 <Row label={`Fotografije (${images.length})`} value={`${totals.qty} kopija`} muted />
                 {extras.length > 0 && (
                   <Row label="Dodatni proizvodi" value={`${extras.length} stavki`} muted />
                 )}
+                {totals.volumeDiscount > 0 && (
+                  <Row
+                    label={`Količinski popust (${totals.vdPercent}%)`}
+                    value={<span className="text-success">-{formatKM(totals.volumeDiscount)}</span>}
+                    muted
+                  />
+                )}
                 <div className="my-3 border-t border-border" />
                 <Row label="Međuzbir" value={formatKM(totals.subtotal)} muted />
+
                 <Row
                   label="Dostava"
                   value={

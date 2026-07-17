@@ -36,7 +36,10 @@ Deno.serve(async (req) => {
     if (!isUuid(orderRef)) throw new Error("Neispravan orderRef.");
     if (!customer || typeof customer !== "object") throw new Error("Nedostaju podaci kupca.");
     if (!Array.isArray(items) || items.length === 0) throw new Error("Nedostaju stavke narudžbe.");
-    if (items.length > 500) throw new Error("Previše stavki.");
+    if (items.length > 200) throw new Error("Previše stavki.");
+    const photoItemsCount = items.filter((it: any) => it && it.storage_path).length;
+    if (photoItemsCount > 100) throw new Error("Maksimalno 100 fotografija po narudžbi.");
+
 
     const required = ["full_name", "phone", "address", "city"] as const;
     for (const k of required) {
@@ -62,7 +65,9 @@ Deno.serve(async (req) => {
 
     const formatMap = new Map((formats ?? []).map((f: any) => [f.id, f]));
 
-    let subtotal = 0;
+    let photoSubtotal = 0;
+    let extraSubtotal = 0;
+    let photoQty = 0;
     const orderItemRows: any[] = [];
     const imageRows: any[] = [];
     const imageIdByPath = new Map<string, string>();
@@ -72,11 +77,12 @@ Deno.serve(async (req) => {
       if (!fmt || !fmt.active) throw new Error("Neispravan format.");
       const qty = Math.max(1, Math.min(500, Number(item.quantity) || 1));
       const lineTotal = Number(fmt.price_km) * qty;
-      subtotal += lineTotal;
 
       let imageId: string | null = null;
       const path = item.storage_path as string | null;
       if (path) {
+        photoSubtotal += lineTotal;
+        photoQty += qty;
         imageId = imageIdByPath.get(path) ?? crypto.randomUUID();
         if (!imageIdByPath.has(path)) {
           imageIdByPath.set(path, imageId);
@@ -87,6 +93,8 @@ Deno.serve(async (req) => {
             status: "active",
           });
         }
+      } else {
+        extraSubtotal += lineTotal;
       }
 
       orderItemRows.push({
@@ -101,6 +109,16 @@ Deno.serve(async (req) => {
         notes: (item.notes ?? null) || null,
       });
     }
+
+    const vdEnabled = !!settings?.volume_discount_enabled;
+    const vdThreshold = Number(settings?.volume_discount_threshold ?? 0);
+    const vdPercent = Number(settings?.volume_discount_percent ?? 0);
+    const volume_discount_fee =
+      vdEnabled && photoQty >= vdThreshold && vdPercent > 0
+        ? photoSubtotal * (vdPercent / 100)
+        : 0;
+    const subtotal = photoSubtotal + extraSubtotal - volume_discount_fee;
+
 
     const freeShip =
       !!settings?.free_shipping_enabled &&
@@ -133,6 +151,8 @@ Deno.serve(async (req) => {
       gift_packaging_fee: Number(gift_packaging_fee.toFixed(2)),
       gift_message: hasGiftMsg ? giftMsgText : null,
       gift_message_fee: Number(gift_message_fee.toFixed(2)),
+      volume_discount_fee: Number(volume_discount_fee.toFixed(2)),
+
       status: "pending",
     });
     if (oErr) throw new Error(oErr.message);

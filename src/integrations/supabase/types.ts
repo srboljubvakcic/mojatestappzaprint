@@ -29,6 +29,9 @@ export type Database = {
           support_enabled: boolean
           support_phone: string
           updated_at: string
+          volume_discount_enabled: boolean
+          volume_discount_percent: number
+          volume_discount_threshold: number
         }
         Insert: {
           free_shipping_enabled?: boolean
@@ -44,6 +47,9 @@ export type Database = {
           support_enabled?: boolean
           support_phone?: string
           updated_at?: string
+          volume_discount_enabled?: boolean
+          volume_discount_percent?: number
+          volume_discount_threshold?: number
         }
         Update: {
           free_shipping_enabled?: boolean
@@ -59,6 +65,9 @@ export type Database = {
           support_enabled?: boolean
           support_phone?: string
           updated_at?: string
+          volume_discount_enabled?: boolean
+          volume_discount_percent?: number
+          volume_discount_threshold?: number
         }
         Relationships: []
       }
@@ -243,6 +252,7 @@ export type Database = {
           shipping_fee: number
           status: Database["public"]["Enums"]["order_status"]
           total_price: number
+          volume_discount_fee: number
         }
         Insert: {
           address: string
@@ -265,6 +275,7 @@ export type Database = {
           shipping_fee?: number
           status?: Database["public"]["Enums"]["order_status"]
           total_price?: number
+          volume_discount_fee?: number
         }
         Update: {
           address?: string
@@ -287,6 +298,7 @@ export type Database = {
           shipping_fee?: number
           status?: Database["public"]["Enums"]["order_status"]
           total_price?: number
+          volume_discount_fee?: number
         }
         Relationships: []
       }

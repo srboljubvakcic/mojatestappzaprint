@@ -752,7 +752,7 @@ function HomePage() {
               )}
               {totals.vdEnabled && totals.qty > 0 && totals.qty < totals.vdThreshold && totals.vdPercent > 0 && (
 
-                <div className="mt-2 rounded-xl bg-primary/5 px-3 py-2 text-xs text-success-foreground">
+                <div className="mt-2 rounded-xl bg-primary/5 px-3 py-2 text-xs text-base">
                   Dodajte još {totals.vdThreshold - totals.qty} fotografija za{" "}
                   <strong>{totals.vdPercent}% popusta</strong>
                 </div>

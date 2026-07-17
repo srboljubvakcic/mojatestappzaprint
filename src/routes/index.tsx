@@ -433,18 +433,40 @@ function HomePage() {
       {/* Image grid */}
       {images.length > 0 && (
         <section className="mx-auto mt-10 max-w-6xl px-4 sm:px-6">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-lg font-semibold">
               Vaše fotografije ({images.length})
             </h3>
             <button
               type="button"
               onClick={() => setImages([])}
-              className="text-xs text-muted-foreground transition-colors hover:text-destructive"
+              className="self-start text-xs text-muted-foreground transition-colors hover:text-destructive sm:self-auto"
             >
               Ukloni sve
             </button>
           </div>
+          {/* Bulk format selector */}
+          <div className="mb-5 flex flex-col gap-2 rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-soft)] sm:flex-row sm:items-center sm:gap-3 sm:p-4">
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-medium">Format za sve fotografije</div>
+              <div className="text-xs text-muted-foreground">
+                Izaberite jednom — primjenjuje se na sve. Možete i pojedinačno mijenjati ispod.
+              </div>
+            </div>
+            <Select onValueChange={(v) => applyFormatToAll(v)}>
+              <SelectTrigger className="rounded-xl sm:w-64">
+                <SelectValue placeholder="Primijeni format na sve" />
+              </SelectTrigger>
+              <SelectContent>
+                {prints.map((f: any) => (
+                  <SelectItem key={f.id} value={f.id}>
+                    {f.name} — {formatKM(Number(f.price_km))}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {images.map((img) => (
               <div

@@ -202,19 +202,29 @@ function HomePage() {
     setExtras((prev) => prev.filter((e) => e.id !== id));
 
   const totals = useMemo(() => {
-    let subtotal = 0;
+    let photoSubtotal = 0;
+    let extraSubtotal = 0;
     let qty = 0;
     for (const img of images) {
       const f = formats.find((f: any) => f.id === img.formatId);
       if (!f) continue;
-      subtotal += Number(f.price_km) * img.quantity;
+      photoSubtotal += Number(f.price_km) * img.quantity;
       qty += img.quantity;
     }
     for (const ex of extras) {
       const f = formats.find((f: any) => f.id === ex.formatId);
       if (!f) continue;
-      subtotal += Number(f.price_km) * ex.quantity;
+      extraSubtotal += Number(f.price_km) * ex.quantity;
     }
+    // Volume discount on photos only
+    const vdEnabled = !!settings?.volume_discount_enabled;
+    const vdThreshold = Number(settings?.volume_discount_threshold ?? 0);
+    const vdPercent = Number(settings?.volume_discount_percent ?? 0);
+    const volumeDiscount =
+      vdEnabled && qty >= vdThreshold && vdPercent > 0
+        ? photoSubtotal * (vdPercent / 100)
+        : 0;
+    const subtotal = photoSubtotal + extraSubtotal - volumeDiscount;
     const freeShip =
       !!settings?.free_shipping_enabled &&
       subtotal >= Number(settings?.free_shipping_threshold ?? 0);
@@ -230,7 +240,22 @@ function HomePage() {
         ? Number(settings.gift_message_price ?? 0)
         : 0;
     const total = subtotal + shipping + sameDayFee + giftPackFee + giftMsgFee;
-    return { subtotal, shipping, sameDayFee, giftPackFee, giftMsgFee, total, qty, freeShip };
+    return {
+      subtotal,
+      photoSubtotal,
+      extraSubtotal,
+      shipping,
+      sameDayFee,
+      giftPackFee,
+      giftMsgFee,
+      volumeDiscount,
+      vdEnabled,
+      vdThreshold,
+      vdPercent,
+      total,
+      qty,
+      freeShip,
+    };
   }, [images, extras, formats, settings, sameDay, giftPackaging, giftMessage]);
 
   const hasItems = images.length + extras.length > 0;

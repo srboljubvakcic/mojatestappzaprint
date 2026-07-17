@@ -153,12 +153,13 @@ function NavItem({
       activeOptions={{ exact: to === "/panel" }}
       activeProps={{
         className:
-          "flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium text-primary",
+          "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium text-primary",
       }}
       inactiveProps={{
         className:
-          "flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
+          "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
       }}
+
     >
       {icon}
       {children}
